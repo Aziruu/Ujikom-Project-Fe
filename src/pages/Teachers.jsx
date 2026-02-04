@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
 import api from '../api';
+import PageMeta from "../components/common/PageMeta";
 
 export default function Teachers() {
         // --- STATE MANAGEMENT ---
@@ -41,19 +41,17 @@ export default function Teachers() {
                 fetchTeachers();
         }, []);
 
-        // --- HANDLERS UTAMA ---
+        // --- HANDLERS ---
         const handleChange = (e) => {
                 setFormData({ ...formData, [e.target.name]: e.target.value });
         };
 
-        // Buka Modal Tambah
         const openAddModal = () => {
                 setIsEdit(false);
                 setFormData({ name: '', nip: '', email: '', jenis_kelamin: 'L' });
                 setIsModalOpen(true);
         };
 
-        // Buka Modal Edit
         const openEditModal = (guru) => {
                 setIsEdit(true);
                 setCurrentId(guru.id);
@@ -66,7 +64,6 @@ export default function Teachers() {
                 setIsModalOpen(true);
         };
 
-        // Submit Tambah/Edit
         const handleSubmit = async (e) => {
                 e.preventDefault();
                 setLoading(true);
@@ -80,32 +77,33 @@ export default function Teachers() {
                         }
                         setIsModalOpen(false);
                         fetchTeachers();
+
                 } catch (err) {
+                        console.error("Error saving teacher:", err);
                         alert("Gagal menyimpan data. Cek inputan.");
-                        console.error(err);
                 } finally {
                         setLoading(false);
                 }
         };
 
-        // Handle Hapus
         const handleDelete = async (id) => {
                 if (window.confirm("Yakin mau menghapus guru ini?")) {
                         try {
                                 await api.delete(`/teachers/${id}`);
                                 setTeachers(teachers.filter(t => t.id !== id));
                         } catch (err) {
+                                console.error("Error deleting teacher:", err);
                                 alert("Gagal menghapus data.");
                         }
                 }
         };
 
-        // --- HANDLERS RFID ---
+        // Handler RFID
         const openRfidModal = (guru) => {
                 setRfidData({
                         id: guru.id,
                         name: guru.name,
-                        rfid_uid: guru.rfid_uid || '' // Ambil yang lama kalau ada
+                        rfid_uid: guru.rfid_uid || ''
                 });
                 setIsRfidModalOpen(true);
         };
@@ -116,40 +114,49 @@ export default function Teachers() {
                         await api.put(`/teachers/${rfidData.id}/rfid`, { rfid_uid: rfidData.rfid_uid });
                         alert(`RFID untuk ${rfidData.name} berhasil ditautkan!`);
                         setIsRfidModalOpen(false);
-                        fetchTeachers(); // Refresh biar data di tabel update
+                        fetchTeachers();
+
                 } catch (err) {
-                        alert("Gagal mendaftarkan RFID. Pastikan kartu belum dipakai guru lain.");
-                        console.error(err);
+                        console.error("Error updating RFID:", err);
+                        alert("Gagal mendaftarkan RFID.");
                 }
         };
 
-        // --- RENDER ---
         return (
-                <div className="flex min-h-screen bg-gray-100">
-                        <Sidebar />
+                <>
+                        <PageMeta title="Data Guru | Si-Hadir Admin" description="Manajemen data guru" />
 
-                        <div className="ml-64 flex-1 p-8">
+                        {/* Container Utama (Tanpa Sidebar & Margin aneh-aneh) */}
+                        <div className="rounded-2xl border border-gray-200 bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-gray-800 dark:bg-white/[0.03] sm:px-7.5 xl:pb-1">
+
+                                {/* Header */}
                                 <div className="flex justify-between items-center mb-6">
-                                        <h1 className="text-3xl font-bold text-gray-800">👨‍🏫 Data Guru</h1>
+                                        <h4 className="text-xl font-bold text-gray-800 dark:text-white">
+                                                👨‍🏫 Data Guru
+                                        </h4>
                                         <button
                                                 onClick={openAddModal}
-                                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200"
+                                                className="flex items-center justify-center gap-2 rounded-lg bg-brand-500 py-2 px-4 text-white hover:bg-brand-600 transition"
                                         >
                                                 ➕ Tambah Guru
                                         </button>
                                 </div>
 
-                                {error && <div className="bg-red-100 text-red-700 p-3 mb-4 rounded border border-red-200">{error}</div>}
+                                {error && (
+                                        <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                                                {error}
+                                        </div>
+                                )}
 
-                                {/* TABEL GURU */}
-                                <div className="bg-white rounded-lg shadow overflow-hidden">
-                                        <table className="min-w-full leading-normal">
+                                {/* Tabel */}
+                                <div className="max-w-full overflow-x-auto">
+                                        <table className="w-full table-auto">
                                                 <thead>
-                                                        <tr>
-                                                                <th className="px-5 py-3 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama</th>
-                                                                <th className="px-5 py-3 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">NIP</th>
-                                                                <th className="px-5 py-3 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                                                                <th className="px-5 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                                                        <tr className="bg-gray-100 text-left dark:bg-gray-700/50">
+                                                                <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">Nama</th>
+                                                                <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">NIP</th>
+                                                                <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">Email</th>
+                                                                <th className="py-4 px-4 font-medium text-black dark:text-white text-center">Aksi</th>
                                                         </tr>
                                                 </thead>
                                                 <tbody>
@@ -159,41 +166,26 @@ export default function Teachers() {
                                                                 <tr><td colSpan="4" className="text-center py-10 text-gray-500">Belum ada data guru.</td></tr>
                                                         ) : (
                                                                 teachers.map((guru) => (
-                                                                        <tr key={guru.id} className="hover:bg-gray-50 border-b border-gray-200">
-                                                                                <td className="px-5 py-5 text-sm">
-                                                                                        <div className="flex items-center">
-                                                                                                <div className="ml-3">
-                                                                                                        <p className="text-gray-900 font-bold">{guru.name}</p>
-                                                                                                        <p className="text-gray-500 text-xs">{guru.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
-                                                                                                </div>
-                                                                                        </div>
+                                                                        <tr key={guru.id}>
+                                                                                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-gray-700 xl:pl-11">
+                                                                                        <h5 className="font-medium text-black dark:text-white">{guru.name}</h5>
+                                                                                        <p className="text-sm text-gray-500">{guru.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
                                                                                 </td>
-                                                                                <td className="px-5 py-5 text-sm text-gray-700">{guru.nip || '-'}</td>
-                                                                                <td className="px-5 py-5 text-sm text-gray-700">{guru.email}</td>
-                                                                                <td className="px-5 py-5 text-sm text-center">
-                                                                                        <div className="flex justify-center space-x-3">
-                                                                                                {/* Tombol RFID */}
-                                                                                                <button
-                                                                                                        onClick={() => openRfidModal(guru)}
-                                                                                                        className="text-purple-600 hover:text-purple-900 flex items-center tooltip"
-                                                                                                        title="Set RFID"
-                                                                                                >
-                                                                                                        🆔 <span className="ml-1 text-xs">RFID</span>
+                                                                                <td className="border-b border-[#eee] py-5 px-4 dark:border-gray-700">
+                                                                                        <p className="text-black dark:text-white">{guru.nip || '-'}</p>
+                                                                                </td>
+                                                                                <td className="border-b border-[#eee] py-5 px-4 dark:border-gray-700">
+                                                                                        <p className="text-black dark:text-white">{guru.email}</p>
+                                                                                </td>
+                                                                                <td className="border-b border-[#eee] py-5 px-4 dark:border-gray-700">
+                                                                                        <div className="flex items-center justify-center space-x-3.5">
+                                                                                                <button onClick={() => openRfidModal(guru)} className="hover:text-brand-500 text-gray-600 dark:text-gray-400" title="Set RFID">
+                                                                                                        🆔
                                                                                                 </button>
-                                                                                                {/* Tombol Edit */}
-                                                                                                <button
-                                                                                                        onClick={() => openEditModal(guru)}
-                                                                                                        className="text-blue-600 hover:text-blue-900"
-                                                                                                        title="Edit Data"
-                                                                                                >
+                                                                                                <button onClick={() => openEditModal(guru)} className="hover:text-brand-500 text-gray-600 dark:text-gray-400" title="Edit">
                                                                                                         ✏️
                                                                                                 </button>
-                                                                                                {/* Tombol Hapus */}
-                                                                                                <button
-                                                                                                        onClick={() => handleDelete(guru.id)}
-                                                                                                        className="text-red-600 hover:text-red-900"
-                                                                                                        title="Hapus Data"
-                                                                                                >
+                                                                                                <button onClick={() => handleDelete(guru.id)} className="hover:text-red-500 text-gray-600 dark:text-gray-400" title="Hapus">
                                                                                                         🗑️
                                                                                                 </button>
                                                                                         </div>
@@ -206,119 +198,70 @@ export default function Teachers() {
                                 </div>
                         </div>
 
-                        {/* --- MODAL INPUT DATA GURU --- */}
+                        {/* --- MODAL INPUT DATA --- */}
                         {isModalOpen && (
-                                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 transition-opacity">
-                                        <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md transform transition-all scale-100">
-                                                <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                                        <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-2xl dark:bg-gray-800">
+                                                <h3 className="mb-6 text-xl font-bold text-black dark:text-white">
                                                         {isEdit ? '✏️ Edit Data Guru' : '➕ Tambah Guru Baru'}
-                                                </h2>
+                                                </h3>
                                                 <form onSubmit={handleSubmit}>
                                                         <div className="mb-4">
-                                                                <label className="block text-gray-700 text-sm font-bold mb-2">Nama Lengkap</label>
+                                                                <label className="mb-2.5 block text-black dark:text-white">Nama Lengkap</label>
                                                                 <input
                                                                         type="text" name="name"
                                                                         value={formData.name} onChange={handleChange}
                                                                         required
-                                                                        className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
-                                                                        placeholder="Contoh: Budi Santoso"
+                                                                        className="w-full rounded-lg border-[1.5px] border-gray-300 bg-transparent py-3 px-5 font-medium outline-none transition focus:border-brand-500 active:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500"
                                                                 />
                                                         </div>
                                                         <div className="mb-4">
-                                                                <label className="block text-gray-700 text-sm font-bold mb-2">NIP (Opsional)</label>
-                                                                <input
-                                                                        type="text" name="nip"
-                                                                        value={formData.nip} onChange={handleChange}
-                                                                        className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
-                                                                />
+                                                                <label className="mb-2.5 block text-black dark:text-white">NIP</label>
+                                                                <input type="text" name="nip" value={formData.nip} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-gray-300 bg-transparent py-3 px-5 font-medium outline-none transition focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900" />
                                                         </div>
                                                         <div className="mb-4">
-                                                                <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                                                                <input
-                                                                        type="email" name="email"
-                                                                        value={formData.email} onChange={handleChange}
-                                                                        required
-                                                                        className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
-                                                                />
+                                                                <label className="mb-2.5 block text-black dark:text-white">Email</label>
+                                                                <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full rounded-lg border-[1.5px] border-gray-300 bg-transparent py-3 px-5 font-medium outline-none transition focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900" />
                                                         </div>
                                                         <div className="mb-6">
-                                                                <label className="block text-gray-700 text-sm font-bold mb-2">Jenis Kelamin</label>
-                                                                <select
-                                                                        name="jenis_kelamin"
-                                                                        value={formData.jenis_kelamin} onChange={handleChange}
-                                                                        className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 bg-white"
-                                                                >
+                                                                <label className="mb-2.5 block text-black dark:text-white">Jenis Kelamin</label>
+                                                                <select name="jenis_kelamin" value={formData.jenis_kelamin} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-gray-300 bg-transparent py-3 px-5 font-medium outline-none transition focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                                                         <option value="L">Laki-laki</option>
                                                                         <option value="P">Perempuan</option>
                                                                 </select>
                                                         </div>
-
-                                                        <div className="flex justify-end space-x-3">
-                                                                <button
-                                                                        type="button"
-                                                                        onClick={() => setIsModalOpen(false)}
-                                                                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                                                                >
-                                                                        Batal
-                                                                </button>
-                                                                <button
-                                                                        type="submit"
-                                                                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-bold"
-                                                                        disabled={loading}
-                                                                >
-                                                                        {loading ? 'Menyimpan...' : 'Simpan Data'}
-                                                                </button>
+                                                        <div className="flex justify-end gap-3">
+                                                                <button type="button" onClick={() => setIsModalOpen(false)} className="rounded bg-gray-200 py-2 px-6 font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300">Batal</button>
+                                                                <button type="submit" disabled={loading} className="rounded bg-brand-500 py-2 px-6 font-medium text-white hover:bg-brand-600">{loading ? 'Menyimpan...' : 'Simpan'}</button>
                                                         </div>
                                                 </form>
                                         </div>
                                 </div>
                         )}
 
-                        {/* --- MODAL SET RFID (YANG HILANG TADI) --- */}
+                        {/* --- MODAL RFID --- */}
                         {isRfidModalOpen && (
-                                <div className="fixed inset-0 bg-gray-900 bg-opacity-60 flex justify-center items-center z-50">
-                                        <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-sm text-center">
-                                                <div className="mb-4">
-                                                        <span className="text-4xl">📡</span>
-                                                </div>
-                                                <h2 className="text-xl font-bold mb-2 text-gray-800">Scan Kartu RFID</h2>
-                                                <p className="text-sm text-gray-600 mb-4">
-                                                        Tempelkan kartu pada reader untuk guru: <br />
-                                                        <span className="font-bold text-blue-600 text-lg">{rfidData.name}</span>
-                                                </p>
-
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                                        <div className="w-full max-w-sm rounded-xl bg-white p-8 text-center shadow-2xl dark:bg-gray-800">
+                                                <div className="mb-4 text-4xl">📡</div>
+                                                <h3 className="mb-2 text-xl font-bold text-black dark:text-white">Scan Kartu RFID</h3>
+                                                <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">Tempelkan kartu untuk <span className="font-bold text-brand-500">{rfidData.name}</span></p>
                                                 <form onSubmit={handleRfidSubmit}>
-                                                        <div className="mb-6">
-                                                                <input
-                                                                        type="text"
-                                                                        autoFocus // Biar langsung siap scan
-                                                                        value={rfidData.rfid_uid}
-                                                                        onChange={(e) => setRfidData({ ...rfidData, rfid_uid: e.target.value })}
-                                                                        placeholder="UID Kartu..."
-                                                                        className="w-full text-center border-2 border-dashed border-blue-300 p-3 rounded-lg focus:outline-none focus:border-blue-500 font-mono text-lg"
-                                                                />
-                                                                <p className="text-xs text-gray-400 mt-2">*Klik input box lalu tap kartu</p>
-                                                        </div>
-
-                                                        <div className="flex justify-center space-x-3">
-                                                                <button
-                                                                        type="button"
-                                                                        onClick={() => setIsRfidModalOpen(false)}
-                                                                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                                                                >
-                                                                        Tutup
-                                                                </button>
-                                                                <button
-                                                                        type="submit"
-                                                                        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-bold shadow-lg"
-                                                                >
-                                                                        Simpan RFID
-                                                                </button>
+                                                        <input
+                                                                type="text" autoFocus
+                                                                value={rfidData.rfid_uid}
+                                                                onChange={(e) => setRfidData({ ...rfidData, rfid_uid: e.target.value })}
+                                                                placeholder="Menunggu tap kartu..."
+                                                                className="mb-6 w-full rounded-lg border-2 border-dashed border-brand-300 bg-gray-50 py-3 px-5 text-center font-mono text-lg outline-none focus:border-brand-500 dark:bg-gray-900 dark:text-white"
+                                                        />
+                                                        <div className="flex justify-center gap-3">
+                                                                <button type="button" onClick={() => setIsRfidModalOpen(false)} className="rounded bg-gray-200 py-2 px-6 text-gray-700 dark:bg-gray-700 dark:text-gray-300">Tutup</button>
+                                                                <button type="submit" className="rounded bg-brand-500 py-2 px-6 text-white hover:bg-brand-600">Simpan</button>
                                                         </div>
                                                 </form>
                                         </div>
                                 </div>
                         )}
-                </div>
+                </>
         );
 }
