@@ -21,6 +21,7 @@ import Home from "./pages/Dashboard/Home"
 import Teachers from "./pages/Teachers";
 import Attendance from "./pages/Attendance";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AttendanceReport from './pages/AttendanceReport';
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
 
             <Route path="/teachers" element={<Teachers />} />
             <Route path="/attendance" element={<Attendance />} />
+            <Route path="/report" element={<AttendanceReport />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
