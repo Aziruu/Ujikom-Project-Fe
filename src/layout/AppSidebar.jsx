@@ -67,6 +67,11 @@ const navItems = [
     name: "Laporan Log",
     path: "/report"
   },
+  {
+    icon: <PageIcon />, // Atau icon lain yg sesuai
+    name: "Pengajuan Cuti",
+    path: "/leaves"
+  },
 ]
 
 const othersItems = [

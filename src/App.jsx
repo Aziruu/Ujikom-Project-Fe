@@ -22,6 +22,7 @@ import Teachers from "./pages/Teachers";
 import Attendance from "./pages/Attendance";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AttendanceReport from './pages/AttendanceReport';
+import LeaveRequests from './pages/LeaveRequest';
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/teachers" element={<Teachers />} />
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/report" element={<AttendanceReport />} />
+            <Route path="/leaves" element={<LeaveRequests />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
