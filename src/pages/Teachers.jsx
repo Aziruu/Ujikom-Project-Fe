@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 import PageMeta from "../components/common/PageMeta";
-import EnrollFace from '../components/EnrollFace'; // Pastikan import ini ada
 
 export default function Teachers() {
     // --- STATE ---
@@ -15,7 +14,7 @@ export default function Teachers() {
     const [totalData, setTotalData] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // State Modal & Form (Tambah/Edit Guru)
+    // State Modal & Form
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [currentId, setCurrentId] = useState(null);
@@ -25,11 +24,7 @@ export default function Teachers() {
     const [isRfidModalOpen, setIsRfidModalOpen] = useState(false);
     const [rfidData, setRfidData] = useState({ id: null, name: '', rfid_uid: '' });
 
-    // --- STATE FACE ENROLLMENT (YANG HILANG TADI) ---
-    const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
-    const [selectedTeacherForFace, setSelectedTeacherForFace] = useState(null);
-
-    // --- FETCH DATA (REAL SERVER-SIDE) ---
+    // --- FETCH DATA ---
     const fetchTeachers = async (page = 1, search = '') => {
         setLoading(true);
         try {
@@ -91,7 +86,7 @@ export default function Teachers() {
             setIsModalOpen(false);
             fetchTeachers(currentPage, searchTerm);
         } catch (err) {
-            console.error(err); // Gunakan err biar ga warning
+            console.error(err);
             alert("Gagal menyimpan data.");
         } finally {
             setLoading(false);
@@ -126,12 +121,6 @@ export default function Teachers() {
             console.error(err);
             alert("Gagal mendaftarkan RFID.");
         }
-    };
-
-    // Handler Buka Modal Wajah
-    const openFaceModal = (guru) => {
-        setSelectedTeacherForFace(guru);
-        setIsFaceModalOpen(true);
     };
 
     return (
@@ -205,15 +194,6 @@ export default function Teachers() {
                                                     {/* TOMBOL RFID */}
                                                     <button onClick={() => openRfidModal(guru)} className="p-2 rounded-lg hover:bg-purple-100 text-purple-600 dark:hover:bg-purple-900/30 transition" title="Set RFID">
                                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><rect x="7" y="7" width="10" height="10" rx="1" /></svg>
-                                                    </button>
-
-                                                    {/* TOMBOL FACE ENROLL (YANG BARU) */}
-                                                    <button 
-                                                        onClick={() => openFaceModal(guru)} 
-                                                        className="p-2 rounded-lg hover:bg-green-100 text-green-600 dark:hover:bg-green-900/30 transition" 
-                                                        title="Daftar Wajah"
-                                                    >
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 7h.01"/><path d="M15 7h.01"/><path d="M12 10a4 4 0 0 0-4 4v1h8v-1a4 4 0 0 0-4-4Z"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"/></svg>
                                                     </button>
 
                                                     {/* TOMBOL EDIT */}
@@ -303,27 +283,6 @@ export default function Teachers() {
                                 <button type="submit" className="rounded-lg bg-purple-600 py-2.5 px-6 text-sm font-medium text-white hover:bg-purple-700">Simpan RFID</button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            )}
-
-            {/* --- MODAL FACE ENROLLMENT (YANG BARU) --- */}
-            {isFaceModalOpen && selectedTeacherForFace && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-white text-center">
-                            Daftarkan Wajah
-                            <span className="block text-sm font-normal text-gray-500 mt-1">{selectedTeacherForFace.name}</span>
-                        </h3>
-                        
-                        <EnrollFace 
-                            teacherId={selectedTeacherForFace.id} 
-                            onClose={() => setIsFaceModalOpen(false)}
-                            onSuccess={() => {
-                                // Refresh data biar face_descriptor ke-update di list (kalau perlu)
-                                fetchTeachers(currentPage, searchTerm);
-                            }}
-                        />
                     </div>
                 </div>
             )}

@@ -1,22 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as faceapi from 'face-api.js';
 import api from '../api';
 
 export default function Attendance() {
     const navigate = useNavigate();
 
     // --- STATE ---
-    const [activeTab, setActiveTab] = useState('face');
+    // Default langsung ke RFID
+    const [activeTab, setActiveTab] = useState('rfid'); 
     const [rfidInput, setRfidInput] = useState('');
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [teachersList, setTeachersList] = useState([]);
     
-    // AI State
-    const [labeledDescriptors, setLabeledDescriptors] = useState([]);
-    const [faceStatus, setFaceStatus] = useState("Memuat Sistem AI...");
-    const [isModelLoaded, setIsModelLoaded] = useState(false);
-
     // UI State
     const [statusMessage, setStatusMessage] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -24,8 +19,6 @@ export default function Attendance() {
 
     // Refs
     const inputRef = useRef(null);
-    const videoRef = useRef(null);
-    const intervalRef = useRef(null);
 
     // 1. JAM DIGITAL
     useEffect(() => {
@@ -33,189 +26,27 @@ export default function Attendance() {
         return () => clearInterval(timer);
     }, []);
 
-    // 2. LOAD DATA GURU & MODEL AI
+    // 2. LOAD DATA GURU (Untuk mode Manual)
     useEffect(() => {
-        const initSystem = async () => {
+        const fetchTeachers = async () => {
             try {
-                setFaceStatus("Memuat Model AI...");
-                
-                // A. Load Model Face API
-                const MODEL_URL = '/models';
-                
-                console.log("🔄 Loading SSD MobileNet...");
-                await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
-                console.log("✅ SSD MobileNet loaded");
-                
-                console.log("🔄 Loading Face Landmark...");
-                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL); // ⬅️ FIX: faceLandmark68Net
-                console.log("✅ Face Landmark loaded");
-                
-                console.log("🔄 Loading Face Recognition...");
-                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-                console.log("✅ Face Recognition loaded");
-                
-                setIsModelLoaded(true);
-                setFaceStatus("Memuat Data Guru...");
-
-                // B. Load Data Guru
-                const res = await api.get('/teachers?per_page=100');
+                const res = await api.get('/teachers?per_page=100'); 
                 setTeachersList(res.data.data);
-
-                // C. Siapkan Database Wajah (Labeled Descriptors)
-                const labeledDescriptors = [];
-                for (const teacher of res.data.data) {
-                    if (teacher.face_descriptor) {
-                        try {
-                            const descriptorArray = new Float32Array(
-                                Object.values(JSON.parse(teacher.face_descriptor))
-                            );
-                            labeledDescriptors.push(
-                                new faceapi.LabeledFaceDescriptors(
-                                    teacher.id.toString(), 
-                                    [descriptorArray]
-                                )
-                            );
-                        } catch (e) {
-                            console.error("Skip data wajah rusak:", teacher.name, e);
-                        }
-                    }
-                }
-                
-                setLabeledDescriptors(labeledDescriptors);
-                console.log(`✅ Loaded ${labeledDescriptors.length} face descriptors`);
-                setFaceStatus("Sistem Siap. Silakan menghadap kamera.");
-
             } catch (err) {
-                console.error("❌ Gagal init AI:", err);
-                setFaceStatus("Gagal memuat model AI: " + err.message);
+                console.error("Gagal load data guru:", err);
             }
         };
-
-        initSystem();
+        fetchTeachers();
     }, []);
 
-    // 3. START WEBCAM (Jika Tab Face Aktif)
-    useEffect(() => {
-        if (activeTab === 'face' && isModelLoaded) {
-            startVideo();
-        } else {
-            stopVideo();
-        }
-        return () => stopVideo();
-    }, [activeTab, isModelLoaded]);
-
-    const startVideo = () => {
-        setFaceStatus("Mengaktifkan kamera...");
-        navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                width: 640, 
-                height: 480 
-            } 
-        })
-        .then((stream) => {
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                setFaceStatus("Kamera aktif. Mencari wajah...");
-            }
-        })
-        .catch((err) => {
-            console.error("Camera error:", err);
-            setFaceStatus("Kamera tidak ditemukan / izin ditolak.");
-        });
-    };
-
-    const stopVideo = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-            videoRef.current.srcObject = null;
-        }
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-    };
-
-    // 4. DETEKSI WAJAH (LOOPING)
-    const handleVideoPlay = () => {
-        // Cek apakah model sudah loaded
-        if (!isModelLoaded || labeledDescriptors.length === 0) {
-            console.warn("Model belum loaded atau tidak ada face descriptor");
-            return;
-        }
-
-        // Clear interval lama
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-        }
-
-        intervalRef.current = setInterval(async () => {
-            if (!videoRef.current || loading || labeledDescriptors.length === 0) return;
-
-            try {
-                // A. Deteksi wajah di video
-                const detections = await faceapi
-                    .detectAllFaces(videoRef.current)
-                    .withFaceLandmarks()
-                    .withFaceDescriptors();
-
-                if (detections.length > 0) {
-                    // B. Bandingkan dengan database
-                    const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6); // ⬅️ Threshold 0.6
-                    
-                    const bestMatch = faceMatcher.findBestMatch(detections[0].descriptor);
-
-                    // C. Jika Dikenali & Valid
-                    if (bestMatch.label !== 'unknown') {
-                        const teacherId = bestMatch.label;
-                        const detectedTeacher = teachersList.find(t => t.id.toString() === teacherId);
-                        
-                        if (detectedTeacher) {
-                            setFaceStatus(`Halo, ${detectedTeacher.name}! Memproses...`);
-                            
-                            // Stop detection loop
-                            if (intervalRef.current) {
-                                clearInterval(intervalRef.current);
-                                intervalRef.current = null;
-                            }
-                            
-                            handleAttendanceSubmit('face', { teacher_id: teacherId });
-                        }
-                    } else {
-                        setFaceStatus("Wajah tidak dikenali. Coba dekat kamera.");
-                    }
-                } else {
-                    setFaceStatus("Mencari wajah...");
-                }
-            } catch (err) {
-                console.error("Detection error:", err);
-                setFaceStatus("Error deteksi: " + err.message);
-            }
-        }, 1000); // Cek tiap 1 detik
-    };
-
-    // 5. SUBMIT ATTENDANCE
+    // 3. SUBMIT ATTENDANCE (RFID & Manual)
     const handleAttendanceSubmit = async (method, data) => {
         setLoading(true);
         setStatusMessage(null);
 
-        // Ambil Foto Bukti
-        let photoData = null;
-        if (method === 'face' && videoRef.current) {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = videoRef.current.videoWidth;
-                canvas.height = videoRef.current.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(videoRef.current, 0, 0);
-                photoData = canvas.toDataURL('image/jpeg', 0.8); // Quality 0.8
-            } catch (err) {
-                console.error("Snapshot error:", err);
-            }
-        }
-
+        // Payload hanya method dan data identifikasi (tanpa foto)
         const payload = {
             method: method,
-            photo: photoData,
             ...data
         };
 
@@ -236,13 +67,9 @@ export default function Attendance() {
             setRfidInput('');
             setSelectedTeacher('');
             
-            // Reset & restart detection
+            // Clear pesan setelah 4 detik
             setTimeout(() => {
                 setStatusMessage(null);
-                if (activeTab === 'face') {
-                    setFaceStatus("Siap. Silakan menghadap kamera.");
-                    handleVideoPlay(); // Restart
-                }
             }, 4000);
         }
     };
@@ -279,7 +106,7 @@ export default function Attendance() {
         handleAttendanceSubmit('rfid', { rfid_uid: rfidInput.trim() });
     };
 
-    // Auto Focus RFID
+    // Auto Focus RFID (Hanya jalan kalau di tab RFID)
     useEffect(() => {
         if (activeTab === 'rfid' && !loading) {
             const focusInterval = setInterval(() => inputRef.current?.focus(), 500);
@@ -291,7 +118,7 @@ export default function Attendance() {
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
             
-            {/* --- KIRI: Info Panel --- */}
+            {/* KIRI: Info Panel */}
             <div className="w-full lg:w-5/12 bg-gradient-to-br from-blue-600 to-indigo-800 text-white flex flex-col items-center justify-center p-10 relative">
                 <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                 
@@ -311,7 +138,7 @@ export default function Attendance() {
                 </div>
             </div>
 
-            {/* --- KANAN: Interaksi --- */}
+            {/* KANAN: Interaksi */}
             <div className="w-full lg:w-7/12 flex flex-col items-center justify-center p-6 relative bg-white dark:bg-gray-900">
                 
                 <button onClick={() => navigate('/dashboard')} className="absolute top-6 right-6 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
@@ -320,9 +147,9 @@ export default function Attendance() {
 
                 <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
                     
-                    {/* Tabs */}
+                    {/* Tabs (Hanya RFID dan Manual) */}
                     <div className="flex border-b border-gray-100 dark:border-gray-700">
-                        {['face', 'rfid', 'manual'].map((tab) => (
+                        {['rfid', 'manual'].map((tab) => (
                             <button 
                                 key={tab}
                                 onClick={() => { setActiveTab(tab); setStatusMessage(null); }}
@@ -332,7 +159,7 @@ export default function Attendance() {
                                     : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                                 }`}
                             >
-                                {tab === 'face' ? 'Wajah' : tab === 'rfid' ? 'Kartu' : 'Manual'}
+                                {tab === 'rfid' ? 'Kartu RFID' : 'Absen Manual'}
                             </button>
                         ))}
                     </div>
@@ -348,31 +175,6 @@ export default function Attendance() {
                                 'bg-red-100 text-red-800 border border-red-200'
                             }`}>
                                 <p className="font-bold text-sm">{statusMessage.text}</p>
-                            </div>
-                        )}
-
-                        {/* --- MODE FACE --- */}
-                        {activeTab === 'face' && (
-                            <div className="flex flex-col items-center w-full">
-                                <div className="relative w-full max-w-[320px] aspect-[4/3] bg-black rounded-xl overflow-hidden border-4 border-blue-500 shadow-2xl mb-4">
-                                    <video 
-                                        ref={videoRef} 
-                                        onPlay={handleVideoPlay}
-                                        autoPlay 
-                                        muted 
-                                        playsInline
-                                        className="w-full h-full object-cover transform scale-x-[-1]" 
-                                    />
-                                    {/* Overlay Scan */}
-                                    {!loading && isModelLoaded && (
-                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                            <div className="w-48 h-48 border-2 border-white/30 rounded-full animate-pulse"></div>
-                                        </div>
-                                    )}
-                                </div>
-                                <p className={`font-medium text-center text-sm ${loading ? 'text-blue-600 animate-pulse' : 'text-gray-600 dark:text-gray-300'}`}>
-                                    {loading ? "Sedang Memproses..." : faceStatus}
-                                </p>
                             </div>
                         )}
 

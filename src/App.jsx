@@ -20,9 +20,9 @@ import { ScrollToTop } from "./components/common/ScrollToTop"
 import Home from "./pages/Dashboard/Home"
 import Teachers from "./pages/Teachers";
 import Attendance from "./pages/Attendance";
-import ProtectedRoute from "./components/ProtectedRoute";
 import AttendanceReport from './pages/AttendanceReport';
 import LeaveRequests from './pages/LeaveRequest';
+import CreateLeave from "./pages/CreateLeave";
 
 export default function App() {
   return (
@@ -37,7 +37,12 @@ export default function App() {
             <Route path="/teachers" element={<Teachers />} />
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/report" element={<AttendanceReport />} />
+            
+            {/* Route untuk List Cuti */}
             <Route path="/leaves" element={<LeaveRequests />} />
+            
+            {/* Route untuk Form Buat Cuti */}
+            <Route path="/leaves/create" element={<CreateLeave />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
