@@ -23,6 +23,7 @@ import Attendance from "./pages/Attendance";
 import AttendanceReport from './pages/AttendanceReport';
 import LeaveRequests from './pages/LeaveRequest';
 import CreateLeave from "./pages/CreateLeave";
+import AcademicYear from "./pages/AcademicYear"
 
 export default function App() {
   return (
@@ -43,6 +44,8 @@ export default function App() {
             
             {/* Route untuk Form Buat Cuti */}
             <Route path="/leaves/create" element={<CreateLeave />} />
+
+            <Route path="/academic-years" element={<AcademicYear />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
