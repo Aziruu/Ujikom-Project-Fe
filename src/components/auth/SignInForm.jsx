@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Pakai router-dom
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon, EnvelopeIcon, LockIcon } from "../../icons"; // Pastikan path icon benar
+import { Link, useNavigate } from "react-router-dom"; 
+import { ChevronLeftIcon, EyeCloseIcon, EyeIcon, EnvelopeIcon, LockIcon } from "../../icons"; 
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import api from "../../api";
+import api from "../../api"; 
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isChecked, setIsChecked] = useState(false); // Keep me logged in
+  const [isChecked, setIsChecked] = useState(false); 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,21 +21,27 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
+      // Panggil endpoint login admin kamu
       const response = await api.post("/login/admin", { email, password });
 
-      // Ambil token & user dari response (sesuai struktur backend kamu)
+      // Ambil token & user dari response backend
       const token = response.data.token || response.data.access_token || response.data.data?.token;
       const user = response.data.user || response.data.data?.user;
 
-      if (!token) throw new Error("Token tidak ditemukan");
+      if (!token) {
+        throw new Error("Token tidak ditemukan dari server");
+      }
 
+      // Simpan sesi ke localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      navigate("/"); // Redirect ke Dashboard
+      // Arahkan ke Dashboard
+      navigate("/"); 
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Login gagal. Cek email/password.");
+      console.error("Login Error:", err);
+      // Tangkap pesan error dari backend Laravel jika ada, atau tampilkan pesan default
+      setError(err.response?.data?.message || "Login gagal. Coba cek lagi email atau password-nya.");
     } finally {
       setLoading(false);
     }
@@ -63,7 +69,7 @@ export default function SignInForm() {
             </p>
           </div>
 
-          {/* Pesan Error */}
+          {/* Alert Error */}
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
               {error}
@@ -87,7 +93,6 @@ export default function SignInForm() {
                     required
                   />
                   <span className="absolute left-4 top-1/2 -translate-y-1/2">
-                    {/* Kalau EnvelopeIcon ga ada, hapus aja baris ini */}
                     <EnvelopeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
                   </span>
                 </div>

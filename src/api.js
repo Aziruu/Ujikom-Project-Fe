@@ -7,15 +7,13 @@ const api = axios.create({
         },
 });
 
-// Interceptor untuk otomatis nambah token ke setiap request
+// Interceptor Request: Menyisipkan Token
 api.interceptors.request.use(
         (config) => {
                 const token = localStorage.getItem('token');
                 if (token) {
                         config.headers.Authorization = `Bearer ${token}`;
-                        console.log('🔑 Token dikirim:', token.substring(0, 20) + '...'); // DEBUG
-                } else {
-                        console.warn('⚠️ Tidak ada token di localStorage!'); // DEBUG
+                        console.log('🔑 Token dikirim:', token.substring(0, 20) + '...');
                 }
                 return config;
         },
@@ -24,21 +22,15 @@ api.interceptors.request.use(
         }
 );
 
-// Interceptor untuk handle 401 (token expired/invalid)
+// Interceptor Response: Menangani 401 Unauthorized
 api.interceptors.response.use(
-        (response) => {
-                console.log('✅ Response berhasil dari:', response.config.url); // DEBUG
-                return response;
-        },
+        (response) => response,
         (error) => {
-                console.error('❌ Error response:', error.response?.status, error.response?.data); // DEBUG
-
                 if (error.response?.status === 401) {
-                        console.warn('🚫 401 Unauthorized - Redirect ke login'); // DEBUG
-                        // Token invalid/expired, redirect ke login
+                        console.warn('🚫 401 Unauthorized - Redirect ke login');
                         localStorage.removeItem('token');
                         localStorage.removeItem('user');
-                        window.location.href = '/';
+                        window.location.href = '/signin';
                 }
                 return Promise.reject(error);
         }

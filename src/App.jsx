@@ -24,6 +24,9 @@ import AttendanceReport from './pages/AttendanceReport';
 import LeaveRequests from './pages/LeaveRequest';
 import CreateLeave from "./pages/CreateLeave";
 import AcademicYear from "./pages/AcademicYear"
+import ProtectedRoute from "./components/Protectedroute"
+import Major from "./pages/Major"
+import Subject from "./pages/Subject"
 
 export default function App() {
   return (
@@ -31,44 +34,47 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route index path="/" element={<Home />} />
 
-            <Route path="/teachers" element={<Teachers />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/report" element={<AttendanceReport />} />
-            
-            {/* Route untuk List Cuti */}
-            <Route path="/leaves" element={<LeaveRequests />} />
-            
-            {/* Route untuk Form Buat Cuti */}
-            <Route path="/leaves/create" element={<CreateLeave />} />
+              <Route path="/teachers" element={<Teachers />} />
+              <Route path="/attendance" element={<Attendance />} />
+              <Route path="/report" element={<AttendanceReport />} />
 
-            <Route path="/academic-years" element={<AcademicYear />} />
+              {/* Route untuk List Cuti */}
+              <Route path="/leaves" element={<LeaveRequests />} />
 
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+              {/* Route untuk Form Buat Cuti */}
+              <Route path="/leaves/create" element={<CreateLeave />} />
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+              <Route path="/academic-years" element={<AcademicYear />} />
+              <Route path="/majors" element={<Major />} />
+              <Route path="/subjects" element={<Subject />} />
 
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+              {/* Others Page */}
+              <Route path="/profile" element={<UserProfiles />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/blank" element={<Blank />} />
 
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+              {/* Forms */}
+              <Route path="/form-elements" element={<FormElements />} />
 
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
+              {/* Tables */}
+              <Route path="/basic-tables" element={<BasicTables />} />
+
+              {/* Ui Elements */}
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/avatars" element={<Avatars />} />
+              <Route path="/badge" element={<Badges />} />
+              <Route path="/buttons" element={<Buttons />} />
+              <Route path="/images" element={<Images />} />
+              <Route path="/videos" element={<Videos />} />
+
+              {/* Charts */}
+              <Route path="/line-chart" element={<LineChart />} />
+              <Route path="/bar-chart" element={<BarChart />} />
+            </Route>
           </Route>
 
           {/* Auth Layout */}

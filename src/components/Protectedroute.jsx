@@ -1,12 +1,11 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
-export default function ProtectedRoute({ children }) {
-        const token = localStorage.getItem('token');
+export default function ProtectedRoute() {
+        const token = localStorage.getItem("token");
 
-        // Kalau ga ada token, redirect ke login
         if (!token) {
-                return <Navigate to="/" replace />;
+                return <Navigate to="/signin" replace />;
         }
 
-        return children;
+        return <Outlet />;
 }
