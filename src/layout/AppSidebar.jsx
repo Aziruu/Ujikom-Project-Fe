@@ -72,6 +72,21 @@ const navItems = [
     name: "Pengajuan Cuti",
     path: "/leaves"
   },
+  {
+    icon: <TableIcon />,
+    name: "Tahun Ajar",
+    path: "/academic-years"
+  },
+  {
+    icon: <TableIcon />,
+    name: "Jurusan",
+    path: "/majors"
+  },
+  {
+    icon: <TableIcon />,
+    name: "Mata Pelajaran",
+    path: "/subjects"
+  },
 ]
 
 const othersItems = [
