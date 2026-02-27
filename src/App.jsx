@@ -28,6 +28,7 @@ import ProtectedRoute from "./components/Protectedroute"
 import Major from "./pages/Admin/Major"
 import Subject from "./pages/Admin/Subject"
 import Classroom from "./pages/Admin/Classrooms"
+import WorkSchedule from "./pages/Admin/WorkSchedule"
 
 export default function App() {
   return (
@@ -53,6 +54,7 @@ export default function App() {
               <Route path="/majors" element={<Major />} />
               <Route path="/subjects" element={<Subject />} />
               <Route path="/classrooms" element={<Classroom />} />
+              <Route path="work-schedules" element={<WorkSchedule />}/>
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />
