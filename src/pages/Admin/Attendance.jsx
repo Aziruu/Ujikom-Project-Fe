@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAttendance } from '../hooks/useAttendance';
+import { useAttendance } from '../../hooks/useAttendance';
 
 export default function Attendance() {
     const navigate = useNavigate();
@@ -54,8 +54,8 @@ export default function Attendance() {
                                 key={tab}
                                 onClick={() => { actions.setActiveTab(tab); actions.setStatusMessage(null); }}
                                 className={`flex-1 py-4 font-semibold text-sm uppercase tracking-wide transition-colors ${activeTab === tab
-                                        ? 'bg-blue-600 text-white'
-                                        : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 {tab === 'rfid' ? 'Kartu RFID' : 'Absen Manual'}
@@ -67,8 +67,8 @@ export default function Attendance() {
 
                         {statusMessage && (
                             <div className={`absolute top-4 left-4 right-4 p-3 rounded-lg text-center z-50 shadow-lg animate-in slide-in-from-top-2 ${statusMessage.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
-                                    statusMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                                        'bg-red-100 text-red-800 border border-red-200'
+                                statusMessage.type === 'warning' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                                    'bg-red-100 text-red-800 border border-red-200'
                                 }`}>
                                 <p className="font-bold text-sm">{statusMessage.text}</p>
                             </div>

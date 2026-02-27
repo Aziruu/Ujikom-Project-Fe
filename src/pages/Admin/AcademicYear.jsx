@@ -1,4 +1,4 @@
-import { useAcademicYear } from '../hooks/useAcademicYear';
+import { useAcademicYear } from '../../hooks/useAcademicYear';
 
 export default function AcademicYear() {
         const { state, actions } = useAcademicYear();

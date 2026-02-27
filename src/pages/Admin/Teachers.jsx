@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import api from '../api';
-import PageMeta from "../components/common/PageMeta";
+import api from '../../api';
+import PageMeta from "../../components/common/PageMeta";
 
 export default function Teachers() {
     // --- STATE ---

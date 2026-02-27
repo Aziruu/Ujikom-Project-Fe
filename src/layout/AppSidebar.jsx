@@ -87,6 +87,11 @@ const navItems = [
     name: "Mata Pelajaran",
     path: "/subjects"
   },
+  {
+    icon: <TableIcon />,
+    name: "Kelas",
+    path: "/classrooms"
+  },
 ]
 
 const othersItems = [

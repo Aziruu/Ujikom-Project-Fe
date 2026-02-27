@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api'; 
-import PageMeta from "../components/common/PageMeta";
+import api from '../../api';
+import PageMeta from "../../components/common/PageMeta";
 
 export default function LeaveRequests() {
     const navigate = useNavigate();
@@ -58,7 +58,7 @@ export default function LeaveRequests() {
         setProcessingId(id);
 
         try {
-            await api.put(`/leaves/${id}/verify`, { 
+            await api.put(`/leaves/${id}/verify`, {
                 status,
                 admin_note: status === 'rejected'
                     ? 'Ditolak Admin'
@@ -78,8 +78,8 @@ export default function LeaveRequests() {
 
     // BADGE COLOR STATUS
     const getStatusColor = (s) => {
-        if(s === 'approved') return 'bg-green-100 text-green-700 border-green-200';
-        if(s === 'rejected') return 'bg-red-100 text-red-700 border-red-200';
+        if (s === 'approved') return 'bg-green-100 text-green-700 border-green-200';
+        if (s === 'rejected') return 'bg-red-100 text-red-700 border-red-200';
         return 'bg-yellow-100 text-yellow-700 border-yellow-200';
     };
 
@@ -87,9 +87,9 @@ export default function LeaveRequests() {
     // Pastikan storage:link sudah jalan
     const getFileUrl = (path) => {
         if (!path) return null;
-        
-        const cleanPath = path.replace(/^\//, ''); 
-        
+
+        const cleanPath = path.replace(/^\//, '');
+
         return `http://127.0.0.1:8000/storage/${cleanPath}`;
     };
     return (
@@ -107,7 +107,7 @@ export default function LeaveRequests() {
                         </p>
                     </div>
 
-                    <button 
+                    <button
                         onClick={() => navigate('/leaves/create')}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
                     >
@@ -131,7 +131,7 @@ export default function LeaveRequests() {
                     </select>
 
                     {/* Tanggal */}
-                    <input 
+                    <input
                         type="date"
                         value={filterDate}
                         onChange={(e) => setFilterDate(e.target.value)}

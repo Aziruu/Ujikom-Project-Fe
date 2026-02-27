@@ -1,4 +1,4 @@
-import { useMajor } from '../hooks/useMajor';
+import { useMajor } from '../../hooks/useMajor';
 
 export default function Major() {
         const { state, actions } = useMajor();

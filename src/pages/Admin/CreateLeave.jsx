@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
-import PageMeta from "../components/common/PageMeta";
+import api from '../../api';
+import PageMeta from "../../components/common/PageMeta";
 
 export default function CreateLeave() {
         const navigate = useNavigate();
@@ -41,51 +41,51 @@ export default function CreateLeave() {
                 setFile(e.target.files[0]);
         };
 
-const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        // Validasi File Wajib
-        if (!file) {
-            alert("Wajib upload surat dokter / bukti izin!");
-            return;
-        }
+        const handleSubmit = async (e) => {
+                e.preventDefault();
 
-        setLoading(true);
+                // Validasi File Wajib
+                if (!file) {
+                        alert("Wajib upload surat dokter / bukti izin!");
+                        return;
+                }
 
-        const data = new FormData();
-        data.append('teacher_id', formData.teacher_id);
-        data.append('start_date', formData.start_date);
-        data.append('end_date', formData.end_date);
-        data.append('type', formData.type);
-        data.append('reason', formData.reason);
-        data.append('file', file); 
+                setLoading(true);
 
-        try {
-            // --- PERBAIKAN DISINI ---
-            // Tambahkan config headers 'multipart/form-data'
-            await api.post('/leaves', data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            
-            alert("Pengajuan berhasil dikirim!");
-            navigate('/leaves'); 
-        } catch (error) {
-            console.error("Error submit:", error);
-            // Tampilkan pesan error detail dari backend jika ada
-            const msg = error.response?.data?.message || "Gagal membuat pengajuan.";
-            
-            // Debugging: Cek error validasi spesifik
-            if (error.response?.data?.errors) {
-                console.log("Validation Errors:", error.response.data.errors);
-            }
-            
-            alert(msg);
-        } finally {
-            setLoading(false);
-        }
-    };
+                const data = new FormData();
+                data.append('teacher_id', formData.teacher_id);
+                data.append('start_date', formData.start_date);
+                data.append('end_date', formData.end_date);
+                data.append('type', formData.type);
+                data.append('reason', formData.reason);
+                data.append('file', file);
+
+                try {
+                        // --- PERBAIKAN DISINI ---
+                        // Tambahkan config headers 'multipart/form-data'
+                        await api.post('/leaves', data, {
+                                headers: {
+                                        'Content-Type': 'multipart/form-data',
+                                },
+                        });
+
+                        alert("Pengajuan berhasil dikirim!");
+                        navigate('/leaves');
+                } catch (error) {
+                        console.error("Error submit:", error);
+                        // Tampilkan pesan error detail dari backend jika ada
+                        const msg = error.response?.data?.message || "Gagal membuat pengajuan.";
+
+                        // Debugging: Cek error validasi spesifik
+                        if (error.response?.data?.errors) {
+                                console.log("Validation Errors:", error.response.data.errors);
+                        }
+
+                        alert(msg);
+                } finally {
+                        setLoading(false);
+                }
+        };
 
         return (
                 <>

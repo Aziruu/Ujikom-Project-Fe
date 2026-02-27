@@ -1,4 +1,4 @@
-import { useSubject } from '../hooks/useSubject';
+import { useSubject } from '../../hooks/useSubject';
 
 export default function Subject() {
         const { state, actions } = useSubject();

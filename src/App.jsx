@@ -18,15 +18,16 @@ import Blank from "./pages/Blank"
 import AppLayout from "./layout/AppLayout"
 import { ScrollToTop } from "./components/common/ScrollToTop"
 import Home from "./pages/Dashboard/Home"
-import Teachers from "./pages/Teachers";
-import Attendance from "./pages/Attendance";
-import AttendanceReport from './pages/AttendanceReport';
-import LeaveRequests from './pages/LeaveRequest';
-import CreateLeave from "./pages/CreateLeave";
-import AcademicYear from "./pages/AcademicYear"
+import Teachers from "./pages/Admin/Teachers";
+import Attendance from "./pages/Admin/Attendance";
+import AttendanceReport from './pages/Admin/AttendanceReport';
+import LeaveRequests from './pages/Admin/LeaveRequest';
+import CreateLeave from "./pages/Admin/CreateLeave";
+import AcademicYear from "./pages/Admin/AcademicYear"
 import ProtectedRoute from "./components/Protectedroute"
-import Major from "./pages/Major"
-import Subject from "./pages/Subject"
+import Major from "./pages/Admin/Major"
+import Subject from "./pages/Admin/Subject"
+import Classroom from "./pages/Admin/Classrooms"
 
 export default function App() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/academic-years" element={<AcademicYear />} />
               <Route path="/majors" element={<Major />} />
               <Route path="/subjects" element={<Subject />} />
+              <Route path="/classrooms" element={<Classroom />} />
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />

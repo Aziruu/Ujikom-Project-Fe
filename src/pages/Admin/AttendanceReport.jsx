@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../api';
+import api from '../../api';
 
 export default function AttendanceReport() {
     const [logs, setLogs] = useState([]);
@@ -40,7 +40,7 @@ export default function AttendanceReport() {
 
     return (
         <div className="bg-gray-50 dark:bg-gray-900 min-h-[80vh] font-sans text-gray-800 dark:text-gray-100">
-            
+
             {/* Header Page */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div>
@@ -64,7 +64,7 @@ export default function AttendanceReport() {
                             onChange={(e) => setSearch(e.target.value)}
                             className="pl-9 p-2 w-48 text-sm border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 focus:ring-1 focus:ring-blue-500 outline-none"
                         />
-                        <svg className="absolute left-2.5 top-2.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <svg className="absolute left-2.5 top-2.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                     </div>
                 </div>
             </div>
@@ -98,21 +98,19 @@ export default function AttendanceReport() {
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                                                log.method === 'rfid' 
-                                                ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300' 
-                                                : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
-                                            }`}>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${log.method === 'rfid'
+                                                    ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300'
+                                                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
+                                                }`}>
                                                 {log.method}
                                             </span>
                                         </td>
                                         <td className="p-4 text-center font-mono">{log.check_in}</td>
                                         <td className="p-4 text-center">
-                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                                                log.status === 'hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                                log.status === 'telat' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                                                'bg-gray-100 text-gray-700'
-                                            }`}>
+                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${log.status === 'hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                                    log.status === 'telat' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                                        'bg-gray-100 text-gray-700'
+                                                }`}>
                                                 {log.status === 'telat' ? `Telat ${log.late_duration}m` : log.status.toUpperCase()}
                                             </span>
                                         </td>
@@ -127,13 +125,13 @@ export default function AttendanceReport() {
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-sm">
                     <span className="text-gray-500">Hal {pagination.current_page || 1} dari {pagination.last_page || 1}</span>
                     <div className="flex gap-2">
-                        <button 
-                            disabled={!pagination.prev_page_url} 
+                        <button
+                            disabled={!pagination.prev_page_url}
                             onClick={() => fetchLogs(pagination.prev_page_url)}
                             className="px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded disabled:opacity-50"
                         >Prev</button>
-                        <button 
-                            disabled={!pagination.next_page_url} 
+                        <button
+                            disabled={!pagination.next_page_url}
                             onClick={() => fetchLogs(pagination.next_page_url)}
                             className="px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded disabled:opacity-50"
                         >Next</button>
