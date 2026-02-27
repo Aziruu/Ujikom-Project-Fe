@@ -29,6 +29,7 @@ import Major from "./pages/Admin/Major"
 import Subject from "./pages/Admin/Subject"
 import Classroom from "./pages/Admin/Classrooms"
 import WorkSchedule from "./pages/Admin/WorkSchedule"
+import TeachingSchedule from "./pages/Admin/TeachingSchedule"
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
               <Route path="/subjects" element={<Subject />} />
               <Route path="/classrooms" element={<Classroom />} />
               <Route path="work-schedules" element={<WorkSchedule />}/>
+              <Route path="/teaching-schedules" element={<TeachingSchedule />}/>
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />

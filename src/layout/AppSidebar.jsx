@@ -92,6 +92,16 @@ const navItems = [
     name: "Kelas",
     path: "/classrooms"
   },
+  {
+    icon: <TableIcon />,
+    name: "Jadwal Bekerja",
+    path: "/work-schedules"
+  },
+  {
+    icon: <TableIcon />,
+    name: "Jadwal Mengajar",
+    path: "/teaching-schedules"
+  },
 ]
 
 const othersItems = [
