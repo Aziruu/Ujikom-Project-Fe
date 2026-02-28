@@ -30,6 +30,7 @@ import Subject from "./pages/Admin/Subject"
 import Classroom from "./pages/Admin/Classrooms"
 import WorkSchedule from "./pages/Admin/WorkSchedule"
 import TeachingSchedule from "./pages/Admin/TeachingSchedule"
+import TeachingJournal from "./pages/Admin/TeachingJournal"
 
 export default function App() {
   return (
@@ -55,8 +56,10 @@ export default function App() {
               <Route path="/majors" element={<Major />} />
               <Route path="/subjects" element={<Subject />} />
               <Route path="/classrooms" element={<Classroom />} />
-              <Route path="work-schedules" element={<WorkSchedule />}/>
-              <Route path="/teaching-schedules" element={<TeachingSchedule />}/>
+              <Route path="work-schedules" element={<WorkSchedule />} />
+              <Route path="/teaching-schedules" element={<TeachingSchedule />} />
+
+              <Route path="/teaching-journals" element={<TeachingJournal />} />
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />
