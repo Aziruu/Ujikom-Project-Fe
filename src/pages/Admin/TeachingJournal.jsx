@@ -95,13 +95,25 @@ export default function TeachingJournal() {
                                                 <form onSubmit={actions.handleSubmit} className="space-y-4">
 
                                                         <div className="grid grid-cols-2 gap-4">
-                                                                <div>
+                                                                <div className="relative">
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Pilih Guru</label>
+
+                                                                        {/* Input Search Bar Guru */}
+                                                                        <input
+                                                                                type="text"
+                                                                                placeholder="🔍 Cari nama guru..."
+                                                                                value={state.teacherSearch}
+                                                                                onChange={(e) => actions.setTeacherSearch(e.target.value)}
+                                                                                className="w-full p-2 text-xs mb-2 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none focus:ring-1 focus:ring-blue-500"
+                                                                        />
+
+                                                                        {/* Dropdown Hasil Pencarian (Maksimal nampilin 10) */}
                                                                         <select name="teacher_id" value={form.teacher_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                                                                <option value="">-- Guru --</option>
+                                                                                <option value="">-- Hasil Pencarian ({teachers.length}) --</option>
                                                                                 {Array.isArray(teachers) && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                                                         </select>
                                                                 </div>
+
                                                                 <div>
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Tanggal</label>
                                                                         <input type="date" name="date" value={form.date} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />

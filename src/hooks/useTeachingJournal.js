@@ -13,6 +13,9 @@ export const useTeachingJournal = () => {
         // State modal foto
         const [viewPhotos, setViewPhotos] = useState(null);
 
+        // State Cari Guru
+        const [teacherSearch, setTeacherSearch] = useState('');
+
         // State nampung form dan file foto
         const [form, setForm] = useState({
                 teacher_id: '',
@@ -28,14 +31,12 @@ export const useTeachingJournal = () => {
         const fetchData = async () => {
                 setLoading(true);
                 try {
-                        const [resJournals, resTeachers, resClass, resSched] = await Promise.all([
+                        const [resJournals, resClass, resSched] = await Promise.all([
                                 api.get('/teaching-journals'),
-                                api.get('/teachers?per_page=100'),
                                 api.get('/classrooms'),
                                 api.get('/teaching-schedules')
                         ]);
                         setData(resJournals.data.data);
-                        setTeachers(resTeachers.data.data || resTeachers.data);
                         setClassrooms(resClass.data.data);
                         setSchedules(resSched.data.data);
                 } catch (err) {
@@ -46,6 +47,23 @@ export const useTeachingJournal = () => {
         };
 
         useEffect(() => { fetchData(); }, []);
+
+        //  Use Effect Pencarian Guru
+        useEffect(() => {
+                const fetchTeachers = async () => {
+                        try {
+                                // Minta data 10 guru aja, ditambah filter pencarian kalau ada
+                                const res = await api.get(`/teachers?search=${teacherSearch}`);
+                                setTeachers(res.data.data);
+                        } catch (err) {
+                                console.error("Gagal cari guru:", err);
+                        }
+                };
+
+                // Delay 500ms biar nggak ngirim request tiap ketik 1 huruf (Debounce)
+                const timer = setTimeout(() => fetchTeachers(), 500);
+                return () => clearTimeout(timer);
+        }, [teacherSearch]);
 
         const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -135,7 +153,7 @@ export const useTeachingJournal = () => {
         };
 
         return {
-                state: { data, teachers, classrooms, schedules, loading, modalOpen, form, photos, viewPhotos },
-                actions: { handleChange, handleFileChange, getLocation, openModal, setModalOpen, handleSubmit, handleVerify, handleDelete, setViewPhotos }
+                state: { data, teachers, classrooms, schedules, loading, modalOpen, form, photos, viewPhotos, teacherSearch },
+                actions: { handleChange, handleFileChange, getLocation, openModal, setModalOpen, handleSubmit, handleVerify, handleDelete, setViewPhotos, setTeacherSearch }
         };
 };

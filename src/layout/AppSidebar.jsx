@@ -102,6 +102,11 @@ const navItems = [
     name: "Jadwal Mengajar",
     path: "/teaching-schedules"
   },
+  {
+    icon: <TableIcon />,
+    name: "Jurnal Guru",
+    path: "/teaching-journals"
+  }
 ]
 
 const othersItems = [
