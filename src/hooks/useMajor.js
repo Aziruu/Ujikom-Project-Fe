@@ -2,42 +2,94 @@ import { useState, useEffect } from 'react';
 import api from '../api';
 
 export const useMajor = () => {
+        // State Utama (Tabel Jurusan)
         const [data, setData] = useState([]);
-        const [teachers, setTeachers] = useState([]);
         const [loading, setLoading] = useState(false);
+
+        // State Pagination & Search
+        const [currentPage, setCurrentPage] = useState(1);
+        const [totalPages, setTotalPages] = useState(1);
+        const [totalData, setTotalData] = useState(0);
+        const [searchTerm, setSearchTerm] = useState('');
+
+        // State Modal & Form
         const [modalOpen, setModalOpen] = useState(false);
         const [isEditing, setIsEditing] = useState(false);
+        const [form, setForm] = useState({
+                id: null,
+                code: '',
+                name: '',
+                head_of_program_id: ''
+        });
 
-        const [form, setForm] = useState({ id: null, code: '', name: '', head_of_program_id: '' });
+        // State Dropdown Guru (Kepala Jurusan)
+        const [teachers, setTeachers] = useState([]);
+        const [teacherSearch, setTeacherSearch] = useState('');
 
-        const fetchData = async () => {
+        // Pemanggilan Data Utama (Jurusan)
+        const fetchMajors = async (page = 1, search = '') => {
                 setLoading(true);
                 try {
-                        const [resMajors, resTeachers] = await Promise.all([
-                                api.get('/majors'),
-                                api.get('/teachers?per_page=100')
-                        ]);
-                        setData(resMajors.data.data);
-                        setTeachers(resTeachers.data.data || resTeachers.data);
-                } catch (err) {
-                        console.error(err);
+                        const response = await api.get(`/majors?page=${page}&search=${search}`);
+                        const result = response.data;
+
+                        setData(result.data);
+                        setCurrentPage(result.meta ? result.meta.current_page : result.current_page);
+                        setTotalPages(result.meta ? result.meta.last_page : result.last_page);
+                        setTotalData(result.meta ? result.meta.total : result.total);
+                } catch (error) {
+                        console.error("Kesalahan saat memuat data jurusan:", error);
                 } finally {
                         setLoading(false);
                 }
         };
 
-        useEffect(() => { fetchData(); }, []);
+        useEffect(() => {
+                const timer = setTimeout(() => {
+                        fetchMajors(currentPage, searchTerm);
+                }, 500);
+                return () => clearTimeout(timer);
+        }, [currentPage, searchTerm]);
 
-        const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+        // Pemanggilan Data Guru untuk Dropdown
+        useEffect(() => {
+                const fetchTeachers = async () => {
+                        try {
+                                const response = await api.get(`/teachers?search=${teacherSearch}`);
+                                setTeachers(response.data.data);
+                        } catch (error) {
+                                console.error("Kesalahan saat memuat data guru:", error);
+                        }
+                };
+
+                const timer = setTimeout(() => fetchTeachers(), 500);
+                return () => clearTimeout(timer);
+        }, [teacherSearch]);
+
+        // Pengendali Peristiwa (Handlers)
+        const handleSearchChange = (e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+        };
+
+        const handleChange = (e) => {
+                setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        };
 
         const openModal = (item = null) => {
                 setIsEditing(!!item);
-                setForm(item ? {
-                        id: item.id,
-                        code: item.code,
-                        name: item.name,
-                        head_of_program_id: item.head_of_program_id || ''
-                } : { id: null, code: '', name: '', head_of_program_id: '' });
+                if (item) {
+                        setForm({
+                                id: item.id,
+                                code: item.code,
+                                name: item.name,
+                                head_of_program_id: item.head_of_program_id || ''
+                        });
+                        setTeacherSearch('');
+                } else {
+                        setForm({ id: null, code: '', name: '', head_of_program_id: '' });
+                        setTeacherSearch('');
+                }
                 setModalOpen(true);
         };
 
@@ -45,28 +97,34 @@ export const useMajor = () => {
                 e.preventDefault();
                 setLoading(true);
                 try {
-                        // head_of_program_id  jadi null biar nggak error
-                        const payload = { ...form, head_of_program_id: form.head_of_program_id || null };
-                        isEditing ? await api.put(`/majors/${form.id}`, payload) : await api.post('/majors', payload);
-                        fetchData();
+                        if (isEditing) {
+                                await api.put(`/majors/${form.id}`, form);
+                        } else {
+                                await api.post('/majors', form);
+                        }
+                        fetchMajors(currentPage, searchTerm);
                         setModalOpen(false);
-                } catch (err) {
-                        alert(err || 'Gagal menyimpan jurusan');
+                } catch (error) {
+                        const errorMessage = error.response?.data?.message || error.message;
+                        alert(`Gagal menyimpan data jurusan: ${errorMessage}`);
                 } finally {
                         setLoading(false);
                 }
         };
 
         const handleDelete = async (id) => {
-                if (confirm('Hapus jurusan ini?')) {
+                if (window.confirm('Apakah Anda yakin ingin menghapus data jurusan ini?')) {
                         try {
                                 await api.delete(`/majors/${id}`);
-                                fetchData();
-                        } catch (err) {
-                                alert(err || 'Gagal menghapus');
+                                fetchMajors(currentPage, searchTerm);
+                        } catch (error) {
+                                alert('Gagal menghapus data jurusan.' + error);
                         }
                 }
         };
 
-        return { state: { data, teachers, loading, modalOpen, isEditing, form }, actions: { handleChange, openModal, setModalOpen, handleSubmit, handleDelete } };
+        return {
+                state: { data, loading, modalOpen, isEditing, form, currentPage, totalPages, totalData, searchTerm, teachers, teacherSearch },
+                actions: { handleSearchChange, handleChange, openModal, setModalOpen, handleSubmit, handleDelete, setCurrentPage, setTeacherSearch }
+        };
 };

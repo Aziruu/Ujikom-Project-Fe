@@ -1,5 +1,7 @@
 import { useTeachingJournal } from '../../hooks/useTeachingJournal';
 import { BASE_URL } from '../../api';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
+import Badge from "../../components/ui/badge/Badge";
 
 export default function TeachingJournal() {
         const { state, actions } = useTeachingJournal();
@@ -18,73 +20,83 @@ export default function TeachingJournal() {
                         </div>
 
                         {/* TABEL DATA JURNAL */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-x-auto">
-                                <table className="w-full text-left text-sm">
-                                        <thead className="bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white uppercase">
-                                                <tr>
-                                                        <th className="p-4">Tanggal</th>
-                                                        <th className="p-4">Guru</th>
-                                                        <th className="p-4">Kelas</th>
-                                                        <th className="p-4">Topik Bahasan</th>
-                                                        <th className="p-4 text-center">Bukti Foto</th>
-                                                        <th className="p-4 text-center">Status</th>
-                                                        <th className="p-4 text-right">Aksi Admin</th>
-                                                </tr>
-                                        </thead>
-                                        <tbody className="divide-y dark:divide-gray-700">
-                                                {data.length === 0 ? (
-                                                        <tr><td colSpan="7" className="p-8 text-center text-gray-500">Belum ada jurnal yang masuk.</td></tr>
-                                                ) : (
-                                                        data.map((item) => {
-                                                                // Parsing JSON string jadi array buat ngitung jumlah foto
-                                                                const photoArray = item.photo_evidence ? JSON.parse(item.photo_evidence) : [];
+                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                                <div className="max-w-full overflow-x-auto">
+                                        <Table>
+                                                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                                                        <TableRow>
+                                                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Tanggal</TableCell>
+                                                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Guru</TableCell>
+                                                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Kelas</TableCell>
+                                                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Topik Bahasan</TableCell>
+                                                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Bukti Foto</TableCell>
+                                                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Status</TableCell>
+                                                                <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-right text-theme-xs dark:text-gray-400">Aksi Admin</TableCell>
+                                                        </TableRow>
+                                                </TableHeader>
 
-                                                                return (
-                                                                        <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                                                                                <td className="p-4 font-medium dark:text-white">{item.date}</td>
-                                                                                <td className="p-4 text-gray-600 dark:text-gray-300">{item.teacher?.name || '-'}</td>
-                                                                                <td className="p-4 font-bold text-blue-600 dark:text-blue-400">{item.classroom?.name || '-'}</td>
-                                                                                <td className="p-4 text-gray-600 dark:text-gray-300 max-w-xs truncate">{item.topic}</td>
+                                                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                                                        {data.length === 0 ? (
+                                                                <TableRow>
+                                                                        <TableCell colSpan="7" className="text-center py-10 text-gray-500 text-theme-sm">Belum ada jurnal yang masuk.</TableCell>
+                                                                </TableRow>
+                                                        ) : (
+                                                                data.map((item) => {
+                                                                        // Parsing JSON string jadi array buat ngitung jumlah foto
+                                                                        const photoArray = item.photo_evidence ? JSON.parse(item.photo_evidence) : [];
 
-                                                                                {/* TOMBOL LIHAT FOTO */}
-                                                                                <td className="p-4 text-center">
-                                                                                        {photoArray.length > 0 ? (
-                                                                                                <button
-                                                                                                        onClick={() => actions.setViewPhotos(photoArray)}
-                                                                                                        className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 mx-auto"
-                                                                                                >
-                                                                                                        👁️ {photoArray.length} Foto
-                                                                                                </button>
-                                                                                        ) : (
-                                                                                                <span className="text-gray-400 text-xs">-</span>
-                                                                                        )}
-                                                                                </td>
+                                                                        return (
+                                                                                <TableRow key={item.id}>
+                                                                                        <TableCell className="px-5 py-4 text-start font-medium text-gray-800 dark:text-white text-theme-sm">
+                                                                                                {item.date}
+                                                                                        </TableCell>
+                                                                                        <TableCell className="px-4 py-3 text-start text-gray-600 dark:text-gray-300 text-theme-sm">
+                                                                                                {item.teacher?.name || '-'}
+                                                                                        </TableCell>
+                                                                                        <TableCell className="px-4 py-3 text-start font-bold text-blue-600 dark:text-blue-400 text-theme-sm">
+                                                                                                {item.classroom?.name || '-'}
+                                                                                        </TableCell>
+                                                                                        <TableCell className="px-4 py-3 text-start text-gray-600 dark:text-gray-300 text-theme-sm max-w-xs truncate" title={item.topic}>
+                                                                                                {item.topic}
+                                                                                        </TableCell>
 
-                                                                                <td className="p-4 text-center">
-                                                                                        <span className={`px-2 py-1 rounded text-xs font-bold ${item.status === 'valid' ? 'bg-green-100 text-green-700' :
-                                                                                                item.status === 'ditolak' ? 'bg-red-100 text-red-700' :
-                                                                                                        'bg-yellow-100 text-yellow-700'
-                                                                                                }`}>
-                                                                                                {item.status.toUpperCase()}
-                                                                                        </span>
-                                                                                </td>
+                                                                                        {/* TOMBOL LIHAT FOTO */}
+                                                                                        <TableCell className="px-4 py-3 text-center">
+                                                                                                {photoArray.length > 0 ? (
+                                                                                                        <button
+                                                                                                                onClick={() => actions.setViewPhotos(photoArray)}
+                                                                                                                className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 mx-auto"
+                                                                                                        >
+                                                                                                                👁️ {photoArray.length} Foto
+                                                                                                        </button>
+                                                                                                ) : (
+                                                                                                        <span className="text-gray-400 text-xs">-</span>
+                                                                                                )}
+                                                                                        </TableCell>
 
-                                                                                {/* AKSI ADMIN */}
-                                                                                <td className="p-4 text-right space-x-2">
-                                                                                        {item.status === 'menunggu' && (
-                                                                                                <>
-                                                                                                        <button onClick={() => actions.handleVerify(item.id, 'valid')} className="text-green-600 font-bold hover:underline" title="Setujui">✅ ACC</button>
-                                                                                                        <button onClick={() => actions.handleVerify(item.id, 'ditolak')} className="text-red-500 font-bold hover:underline" title="Tolak">❌ Tolak</button>
-                                                                                                </>
-                                                                                        )}
-                                                                                        <button onClick={() => actions.handleDelete(item.id)} className="text-gray-400 hover:text-red-500 font-bold transition ml-2">🗑️</button>
-                                                                                </td>
-                                                                        </tr>
-                                                                );
-                                                        })
-                                                )}
-                                        </tbody>
-                                </table>
+                                                                                        <TableCell className="px-4 py-3 text-center">
+                                                                                                <Badge size="sm" color={item.status === 'valid' ? 'success' : item.status === 'ditolak' ? 'error' : 'warning'}>
+                                                                                                        {item.status.toUpperCase()}
+                                                                                                </Badge>
+                                                                                        </TableCell>
+
+                                                                                        {/* AKSI ADMIN */}
+                                                                                        <TableCell className="px-4 py-3 text-right space-x-3">
+                                                                                                {item.status === 'menunggu' && (
+                                                                                                        <>
+                                                                                                                <button onClick={() => actions.handleVerify(item.id, 'valid')} className="text-green-600 font-bold hover:underline" title="Setujui">✅ ACC</button>
+                                                                                                                <button onClick={() => actions.handleVerify(item.id, 'ditolak')} className="text-red-500 font-bold hover:underline" title="Tolak">❌ Tolak</button>
+                                                                                                        </>
+                                                                                                )}
+                                                                                                <button onClick={() => actions.handleDelete(item.id)} className="text-gray-400 hover:text-red-500 font-bold transition ml-2" title="Hapus">🗑️</button>
+                                                                                        </TableCell>
+                                                                                </TableRow>
+                                                                        );
+                                                                })
+                                                        )}
+                                                </TableBody>
+                                        </Table>
+                                </div>
                         </div>
 
                         {/* MODAL FORM TAMBAH JURNAL */}
@@ -93,45 +105,39 @@ export default function TeachingJournal() {
                                         <div className="bg-white dark:bg-gray-800 w-full max-w-xl rounded-xl p-6 shadow-2xl my-8">
                                                 <h2 className="text-xl font-bold mb-4 dark:text-white">Buat Laporan Mengajar</h2>
                                                 <form onSubmit={actions.handleSubmit} className="space-y-4">
-
                                                         <div className="grid grid-cols-2 gap-4">
                                                                 <div className="relative">
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Pilih Guru</label>
-
-                                                                        {/* Input Search Bar Guru */}
                                                                         <input
                                                                                 type="text"
                                                                                 placeholder="🔍 Cari nama guru..."
-                                                                                value={state.teacherSearch}
+                                                                                value={state.teacherSearch || ''}
                                                                                 onChange={(e) => actions.setTeacherSearch(e.target.value)}
-                                                                                className="w-full p-2 text-xs mb-2 border rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-white outline-none focus:ring-1 focus:ring-blue-500"
+                                                                                className="w-full p-2 text-xs mb-2 border rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                                                                         />
-
-                                                                        {/* Dropdown Hasil Pencarian (Maksimal nampilin 10) */}
-                                                                        <select name="teacher_id" value={form.teacher_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                                                                <option value="">-- Hasil Pencarian ({teachers.length}) --</option>
+                                                                        <select name="teacher_id" value={form.teacher_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" required>
+                                                                                <option value="">-- Hasil Pencarian ({Array.isArray(teachers) ? teachers.length : 0}) --</option>
                                                                                 {Array.isArray(teachers) && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                                                         </select>
                                                                 </div>
-
                                                                 <div>
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Tanggal</label>
-                                                                        <input type="date" name="date" value={form.date} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
+                                                                        <input type="date" name="date" value={form.date} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" required />
                                                                 </div>
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-4">
                                                                 <div>
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Kelas</label>
-                                                                        <select name="classroom_id" value={form.classroom_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                                                                <option value="">Kelas</option>
+                                                                        <select name="classroom_id" value={form.classroom_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" required>
+                                                                                <option value="">-- Pilih Kelas --</option>
                                                                                 {Array.isArray(classrooms) && classrooms.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                                                         </select>
                                                                 </div>
                                                                 <div>
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Jadwal Terkait (Opsional)</label>
-                                                                        <select name="schedule_id" value={form.schedule_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                                                                <option value="">Pilih Jadwal</option>
+                                                                        <select name="schedule_id" value={form.schedule_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                                                                                <option value="">-- Pilih Jadwal --</option>
                                                                                 {Array.isArray(schedules) && schedules.map(s => (
                                                                                         <option key={s.id} value={s.id}>{s.day} ({s.start_time.slice(0, 5)}) - {s.subject?.name}</option>
                                                                                 ))}
@@ -141,7 +147,7 @@ export default function TeachingJournal() {
 
                                                         <div>
                                                                 <label className="block text-xs font-medium text-gray-500 mb-1">Topik Bahasan / Materi</label>
-                                                                <textarea name="topic" value={form.topic} onChange={actions.handleChange} rows="2" placeholder="Cth: Membahas relasi database dan ORM" className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
+                                                                <textarea name="topic" value={form.topic} onChange={actions.handleChange} rows="2" placeholder="Cth: Membahas relasi database dan ORM" className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" required />
                                                         </div>
 
                                                         {/* BAGIAN LOKASI GPS */}
@@ -149,7 +155,7 @@ export default function TeachingJournal() {
                                                                 <label className="block text-xs font-medium text-gray-500 mb-2">Lokasi Mengajar (GPS)</label>
                                                                 <div className="flex gap-2 items-center">
                                                                         <button type="button" onClick={actions.getLocation} className="px-3 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs font-bold rounded transition">
-                                                                                Ambil Lokasi Saat Ini
+                                                                                📍 Ambil Lokasi Saat Ini
                                                                         </button>
                                                                         <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                                                                                 {form.latitude ? `${form.latitude}, ${form.longitude}` : 'Lokasi belum dikunci'}
@@ -160,7 +166,7 @@ export default function TeachingJournal() {
                                                         {/* BAGIAN UPLOAD FOTO */}
                                                         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
                                                                 <label className="block text-xs font-medium text-blue-800 dark:text-blue-300 mb-1">
-                                                                        Bukti Foto Mengajar (1 - 3 Foto)
+                                                                        📸 Bukti Foto Mengajar (1 - 3 Foto)
                                                                 </label>
                                                                 <input
                                                                         type="file"
@@ -183,7 +189,7 @@ export default function TeachingJournal() {
                                 </div>
                         )}
 
-                        {/* MODAL VIEW FOTO (Muncul kalau state viewPhotos ada isinya) */}
+                        {/* MODAL VIEW FOTO */}
                         {viewPhotos && (
                                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 animate-in fade-in" onClick={() => actions.setViewPhotos(null)}>
                                         <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-xl p-4 shadow-2xl relative" onClick={e => e.stopPropagation()}>
@@ -191,7 +197,6 @@ export default function TeachingJournal() {
                                                         <h2 className="text-lg font-bold dark:text-white">Bukti Foto Mengajar</h2>
                                                         <button onClick={() => actions.setViewPhotos(null)} className="text-gray-500 hover:text-red-500 font-bold text-2xl leading-none">&times;</button>
                                                 </div>
-
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-[70vh] p-2">
                                                         {viewPhotos.map((photo, idx) => (
                                                                 <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">

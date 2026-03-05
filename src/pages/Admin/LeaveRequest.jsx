@@ -1,259 +1,144 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api';
 import PageMeta from "../../components/common/PageMeta";
+import { useLeaveRequest } from '../../hooks/useLeaveRequest';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
+import Badge from "../../components/ui/badge/Badge";
 
 export default function LeaveRequests() {
     const navigate = useNavigate();
+    const { state, actions } = useLeaveRequest();
+    const { data, loading, filterStatus, filterDate, processingId } = state;
 
-    // STATE
-
-    const [leaves, setLeaves] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [filterStatus, setFilterStatus] = useState('pending');
-    const [processingId, setProcessingId] = useState(null);
-    const [filterDate, setFilterDate] = useState('');
-
-    // FETCH DATA
-
-    const fetchLeaves = async () => {
-        setLoading(true);
-        try {
-            const params = {};
-
-            // kirim status jika bukan 'all'
-            if (filterStatus !== 'all') {
-                params.status = filterStatus;
-            }
-
-            // kirim tanggal jika ada
-            if (filterDate) {
-                params.date = filterDate;
-            }
-
-            const response = await api.get('/leaves', { params });
-
-            // amankan struktur response (hindari undefined error)
-            const data = response?.data?.data?.data || response?.data?.data || [];
-            setLeaves(data);
-
-        } catch (error) {
-            console.error("Gagal ambil data:", error);
-            setLeaves([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // refresh saat filter berubah
-    useEffect(() => {
-        fetchLeaves();
-    }, [filterStatus, filterDate]);
-
-    // VERIFIKASI CUTI
-    const handleVerify = async (id, status, name) => {
-        const action = status === 'approved' ? 'menyetujui' : 'menolak';
-        if (!window.confirm(`Yakin ingin ${action} pengajuan cuti ${name}?`)) return;
-
-        setProcessingId(id);
-
-        try {
-            await api.put(`/leaves/${id}/verify`, {
-                status,
-                admin_note: status === 'rejected'
-                    ? 'Ditolak Admin'
-                    : 'Disetujui Admin'
-            });
-
-            alert(`Berhasil ${status === 'approved' ? 'disetujui' : 'ditolak'}!`);
-            fetchLeaves();
-
-        } catch (error) {
-            console.error(error);
-            alert("Gagal memproses data.");
-        } finally {
-            setProcessingId(null);
-        }
-    };
-
-    // BADGE COLOR STATUS
-    const getStatusColor = (s) => {
-        if (s === 'approved') return 'bg-green-100 text-green-700 border-green-200';
-        if (s === 'rejected') return 'bg-red-100 text-red-700 border-red-200';
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-    };
-
-    // FILE URL GENERATOR
-    // Pastikan storage:link sudah jalan
-    const getFileUrl = (path) => {
-        if (!path) return null;
-
-        const cleanPath = path.replace(/^\//, '');
-
-        return `http://127.0.0.1:8000/storage/${cleanPath}`;
-    };
     return (
         <>
             <PageMeta title="Daftar Cuti | Admin" />
 
-            <div className="space-y-6">
-
+            <div className="space-y-6 p-6">
                 {/* HEADER */}
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold">Pengajuan Cuti</h2>
-                        <p className="text-sm text-gray-500">
-                            Kelola izin dan sakit guru
-                        </p>
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Pengajuan Cuti</h2>
+                        <p className="text-sm text-gray-500 mt-1">Kelola izin dan sakit guru</p>
                     </div>
-
                     <button
                         onClick={() => navigate('/leaves/create')}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+                        className="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md"
                     >
                         Buat Pengajuan
                     </button>
                 </div>
 
                 {/* FILTER */}
-                <div className="flex gap-4 items-center">
-
-                    {/* Status */}
+                <div className="flex gap-3 items-center">
                     <select
                         value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="border p-2 rounded text-sm"
+                        onChange={(e) => actions.setFilterStatus(e.target.value)}
+                        className="border border-gray-300 dark:border-gray-700 p-2 rounded-lg text-sm bg-white dark:bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                     >
-                        <option value="all">Semua</option>
+                        <option value="all">Semua Status</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
 
-                    {/* Tanggal */}
                     <input
                         type="date"
                         value={filterDate}
-                        onChange={(e) => setFilterDate(e.target.value)}
-                        className="border p-2 rounded text-sm"
+                        onChange={(e) => actions.setFilterDate(e.target.value)}
+                        className="border border-gray-300 dark:border-gray-700 p-2 rounded-lg text-sm bg-white dark:bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                     />
 
                     {filterDate && (
-                        <button
-                            onClick={() => setFilterDate('')}
-                            className="text-red-500 text-xs"
-                        >
-                            Reset
+                        <button onClick={() => actions.setFilterDate('')} className="text-red-500 text-xs font-medium hover:underline">
+                            Reset Tanggal
                         </button>
                     )}
                 </div>
 
-                {/* TABLE */}
-                <div className="overflow-x-auto border rounded">
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-100">
-                            <tr>
-                                <th className="p-3 text-left">Guru</th>
-                                <th className="p-3 text-left">Tanggal</th>
-                                <th className="p-3 text-left">Tipe</th>
-                                <th className="p-3 text-left">File</th>
-                                <th className="p-3 text-center">Status</th>
-                                <th className="p-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
+                {/* TABEL */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+                    <div className="max-w-full overflow-x-auto">
+                        <Table>
+                            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                                <TableRow>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Guru</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Tanggal</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Tipe & Alasan</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">File Bukti</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Status</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Aksi</TableCell>
+                                </TableRow>
+                            </TableHeader>
 
-                        <tbody>
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="6" className="p-6 text-center">
-                                        Memuat data...
-                                    </td>
-                                </tr>
-                            ) : leaves.length === 0 ? (
-                                <tr>
-                                    <td colSpan="6" className="p-6 text-center">
-                                        Tidak ada data.
-                                    </td>
-                                </tr>
-                            ) : (
-                                leaves.map(item => (
-                                    <tr key={item.id} className="border-t">
-                                        <td className="p-3">
-                                            <div className="font-semibold">
-                                                {item.teacher?.name}
-                                            </div>
-                                            <div className="text-xs text-gray-500">
-                                                {item.teacher?.nip}
-                                            </div>
-                                        </td>
-
-                                        <td className="p-3">
-                                            {item.start_date} <br />
-                                            <span className="text-xs text-gray-400">
-                                                s/d {item.end_date}
-                                            </span>
-                                        </td>
-
-                                        <td className="p-3">
-                                            <div className="uppercase text-xs font-bold">
-                                                {item.type}
-                                            </div>
-                                            <div className="text-xs italic text-gray-500">
-                                                "{item.reason}"
-                                            </div>
-                                        </td>
-
-                                        <td className="p-3">
-                                            {item.attachment ? (
-                                                <a
-                                                    href={getFileUrl(item.attachment)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 text-xs underline"
-                                                >
-                                                    Lihat File
-                                                </a>
-                                            ) : (
-                                                <span className="text-gray-400 text-xs">
-                                                    Tidak ada file
-                                                </span>
-                                            )}
-                                        </td>
-
-                                        <td className="p-3 text-center">
-                                            <span className={`px-2 py-1 text-xs rounded border ${getStatusColor(item.status)}`}>
-                                                {item.status}
-                                            </span>
-                                        </td>
-
-                                        <td className="p-3 text-center">
-                                            {item.status === 'pending' ? (
-                                                <div className="flex justify-center gap-2">
-                                                    <button
-                                                        onClick={() => handleVerify(item.id, 'approved', item.teacher?.name)}
-                                                        disabled={processingId === item.id}
-                                                        className="text-green-600 text-xs"
-                                                    >
-                                                        Approve
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleVerify(item.id, 'rejected', item.teacher?.name)}
-                                                        disabled={processingId === item.id}
-                                                        className="text-red-600 text-xs"
-                                                    >
-                                                        Reject
-                                                    </button>
+                            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan="6" className="text-center py-10 text-gray-500 text-theme-sm">Memuat data...</TableCell>
+                                    </TableRow>
+                                ) : data.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan="6" className="text-center py-10 text-gray-500 text-theme-sm">Tidak ada data cuti.</TableCell>
+                                    </TableRow>
+                                ) : (
+                                    data.map((item) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell className="px-5 py-4 text-start">
+                                                <div>
+                                                    <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">{item.teacher?.name}</span>
+                                                    <span className="block text-gray-500 text-theme-xs dark:text-gray-400 font-mono mt-0.5">{item.teacher?.nip || '-'}</span>
                                                 </div>
-                                            ) : '-'}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-start text-gray-800 dark:text-gray-200 text-theme-sm">
+                                                {item.start_date} <br />
+                                                <span className="text-gray-400 text-theme-xs">s/d {item.end_date}</span>
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-start">
+                                                <span className="uppercase text-theme-xs font-bold text-gray-700 dark:text-gray-300">{item.type}</span>
+                                                <div className="text-theme-xs italic text-gray-500 mt-1 max-w-[200px] truncate" title={item.reason}>
+                                                    "{item.reason}"
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-start">
+                                                {item.attachment ? (
+                                                    <a href={actions.getFileUrl(item.attachment)} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 text-theme-sm hover:underline font-medium">
+                                                        Lihat File
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-gray-400 text-theme-xs">Tidak ada file</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-center">
+                                                <Badge size="sm" color={item.status === 'approved' ? 'success' : item.status === 'rejected' ? 'error' : 'warning'}>
+                                                    {item.status.toUpperCase()}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-center">
+                                                {item.status === 'pending' ? (
+                                                    <div className="flex justify-center gap-3">
+                                                        <button
+                                                            onClick={() => actions.handleVerify(item.id, 'approved', item.teacher?.name)}
+                                                            disabled={processingId === item.id}
+                                                            className="text-green-600 hover:text-green-700 font-medium text-theme-sm transition disabled:opacity-50"
+                                                        >
+                                                            Approve
+                                                        </button>
+                                                        <button
+                                                            onClick={() => actions.handleVerify(item.id, 'rejected', item.teacher?.name)}
+                                                            disabled={processingId === item.id}
+                                                            className="text-red-600 hover:text-red-700 font-medium text-theme-sm transition disabled:opacity-50"
+                                                        >
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                ) : <span className="text-gray-400">-</span>}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
-
             </div>
         </>
     );

@@ -3,9 +3,9 @@ import api from "../api";
 
 export const useAcademicYear = () => {
         const [data, setData] = useState([]);
-        const [loading, setLoading] = useState([false]);
-        const [modalOpen, setModalOpen] = useState([false]);
-        const [isEditing, setIsEditing] = useState([false]);
+        const [loading, setLoading] = useState(false);
+        const [modalOpen, setModalOpen] = useState(false);
+        const [isEditing, setIsEditing] = useState(false);
 
         // State Form
         const [form, setForm] = useState({
@@ -101,7 +101,7 @@ export const useAcademicYear = () => {
         };
 
         return {
-        state: { data, loading, modalOpen, isEditing, form },
-        actions: { handleChange, openModal, setModalOpen, handleSubmit, handleDelete }
-    };
+                state: { data, loading, modalOpen, isEditing, form },
+                actions: { handleChange, openModal, setModalOpen, handleSubmit, handleDelete }
+        };
 }

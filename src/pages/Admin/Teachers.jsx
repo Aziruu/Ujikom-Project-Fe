@@ -1,5 +1,6 @@
 import PageMeta from "../../components/common/PageMeta";
 import { useTeacher } from "../../hooks/useTeacher";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
 
 export default function Teachers() {
     const { state, actions } = useTeacher();
@@ -9,7 +10,7 @@ export default function Teachers() {
         <>
             <PageMeta title="Data Guru | Si-Hadir Admin" description="Manajemen data guru" />
 
-            <div className="space-y-6">
+            <div className="space-y-6 p-6">
                 {/* Header Section */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -38,70 +39,73 @@ export default function Teachers() {
 
                 {error && <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 border border-red-200 dark:bg-red-900/10 dark:border-red-500/20 dark:text-red-400">{error}</div>}
 
-                {/* Table Container */}
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 shadow-sm">
+                {/* Table Container Menggunakan Komponen Template */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <table className="w-full min-w-[700px]">
-                            <thead className="border-b border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-700/50">
-                                <tr>
-                                    <th className="px-6 py-4 font-semibold text-gray-600 text-left text-xs uppercase tracking-wider dark:text-gray-300">Guru</th>
-                                    <th className="px-6 py-4 font-semibold text-gray-600 text-left text-xs uppercase tracking-wider dark:text-gray-300">NIP</th>
-                                    <th className="px-6 py-4 font-semibold text-gray-600 text-left text-xs uppercase tracking-wider dark:text-gray-300">Email</th>
-                                    <th className="px-6 py-4 font-semibold text-gray-600 text-center text-xs uppercase tracking-wider dark:text-gray-300">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        <Table>
+                            <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                                <TableRow>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Guru</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">NIP</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Email</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Aksi</TableCell>
+                                </TableRow>
+                            </TableHeader>
+
+                            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                                 {loading && !isModalOpen && !isRfidModalOpen ? (
-                                    <tr><td colSpan="4" className="text-center py-10 text-gray-500">Sedang memuat data...</td></tr>
+                                    <TableRow>
+                                        <TableCell colSpan="4" className="text-center py-10 text-gray-500 text-theme-sm">Sedang memuat data...</TableCell>
+                                    </TableRow>
                                 ) : data.length === 0 ? (
-                                    <tr><td colSpan="4" className="text-center py-10 text-gray-500">Tidak ada data ditemukan.</td></tr>
+                                    <TableRow>
+                                        <TableCell colSpan="4" className="text-center py-10 text-gray-500 text-theme-sm">Tidak ada data ditemukan.</TableCell>
+                                    </TableRow>
                                 ) : (
                                     data.map((guru) => (
-                                        <tr key={guru.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
-                                            <td className="px-6 py-4">
+                                        <TableRow key={guru.id}>
+                                            <TableCell className="px-5 py-4 sm:px-6 text-start">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${guru.jenis_kelamin === 'L' ? 'bg-blue-500' : 'bg-pink-500'}`}>
                                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                                                     </div>
                                                     <div>
-                                                        <span className="block font-semibold text-gray-800 text-sm dark:text-white">{guru.name}</span>
-                                                        <span className="block text-gray-500 text-xs dark:text-gray-400">{guru.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
+                                                        <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">{guru.name}</span>
+                                                        <span className="block text-gray-500 text-theme-xs dark:text-gray-400">{guru.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-600 text-sm dark:text-gray-300 font-mono">{guru.nip || '-'}</td>
-                                            <td className="px-6 py-4 text-gray-600 text-sm dark:text-gray-300">{guru.email}</td>
-                                            <td className="px-6 py-4">
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 font-mono">
+                                                {guru.nip || '-'}
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                                {guru.email}
+                                            </TableCell>
+                                            <TableCell className="px-4 py-3 text-center">
                                                 <div className="flex items-center justify-center gap-2">
-                                                    {/* TOMBOL RFID */}
                                                     <button onClick={() => actions.openRfidModal(guru)} className="p-2 rounded-lg hover:bg-purple-100 text-purple-600 dark:hover:bg-purple-900/30 transition" title="Set RFID">
                                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><rect x="7" y="7" width="10" height="10" rx="1" /></svg>
                                                     </button>
-
-                                                    {/* TOMBOL EDIT */}
                                                     <button onClick={() => actions.openEditModal(guru)} className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 dark:hover:bg-blue-900/30 transition" title="Edit">
                                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
                                                     </button>
-
-                                                    {/* TOMBOL HAPUS */}
                                                     <button onClick={() => actions.handleDelete(guru.id)} className="p-2 rounded-lg hover:bg-red-100 text-red-600 dark:hover:bg-red-900/30 transition" title="Hapus">
                                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
                                                     </button>
                                                 </div>
-                                            </td>
-                                        </tr>
+                                            </TableCell>
+                                        </TableRow>
                                     ))
                                 )}
-                            </tbody>
-                        </table>
+                            </TableBody>
+                        </Table>
                     </div>
 
                     {/* Pagination */}
-                    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                             Halaman <span className="font-semibold">{currentPage}</span> dari <span className="font-semibold">{totalPages}</span>
                         </span>
-
                         <div className="flex gap-2">
                             <button
                                 onClick={() => actions.setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -110,7 +114,6 @@ export default function Teachers() {
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg> Prev
                             </button>
-
                             <button
                                 onClick={() => actions.setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages || loading}
