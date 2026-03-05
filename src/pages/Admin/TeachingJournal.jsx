@@ -34,15 +34,17 @@ export default function TeachingJournal() {
                                                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-right text-theme-xs dark:text-gray-400">Aksi Admin</TableCell>
                                                         </TableRow>
                                                 </TableHeader>
-
                                                 <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                                        {data.length === 0 ? (
+                                                        {loading && !modalOpen ? (
+                                                                <TableRow>
+                                                                        <TableCell colSpan="7" className="text-center py-10 text-gray-500 text-theme-sm">Sedang memuat data...</TableCell>
+                                                                </TableRow>
+                                                        ) : data.length === 0 ? (
                                                                 <TableRow>
                                                                         <TableCell colSpan="7" className="text-center py-10 text-gray-500 text-theme-sm">Belum ada jurnal yang masuk.</TableCell>
                                                                 </TableRow>
                                                         ) : (
                                                                 data.map((item) => {
-                                                                        // Parsing JSON string jadi array buat ngitung jumlah foto
                                                                         const photoArray = item.photo_evidence ? JSON.parse(item.photo_evidence) : [];
 
                                                                         return (
@@ -59,8 +61,6 @@ export default function TeachingJournal() {
                                                                                         <TableCell className="px-4 py-3 text-start text-gray-600 dark:text-gray-300 text-theme-sm max-w-xs truncate" title={item.topic}>
                                                                                                 {item.topic}
                                                                                         </TableCell>
-
-                                                                                        {/* TOMBOL LIHAT FOTO */}
                                                                                         <TableCell className="px-4 py-3 text-center">
                                                                                                 {photoArray.length > 0 ? (
                                                                                                         <button
@@ -73,14 +73,11 @@ export default function TeachingJournal() {
                                                                                                         <span className="text-gray-400 text-xs">-</span>
                                                                                                 )}
                                                                                         </TableCell>
-
                                                                                         <TableCell className="px-4 py-3 text-center">
                                                                                                 <Badge size="sm" color={item.status === 'valid' ? 'success' : item.status === 'ditolak' ? 'error' : 'warning'}>
                                                                                                         {item.status.toUpperCase()}
                                                                                                 </Badge>
                                                                                         </TableCell>
-
-                                                                                        {/* AKSI ADMIN */}
                                                                                         <TableCell className="px-4 py-3 text-right space-x-3">
                                                                                                 {item.status === 'menunggu' && (
                                                                                                         <>
@@ -150,7 +147,6 @@ export default function TeachingJournal() {
                                                                 <textarea name="topic" value={form.topic} onChange={actions.handleChange} rows="2" placeholder="Cth: Membahas relasi database dan ORM" className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" required />
                                                         </div>
 
-                                                        {/* BAGIAN LOKASI GPS */}
                                                         <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
                                                                 <label className="block text-xs font-medium text-gray-500 mb-2">Lokasi Mengajar (GPS)</label>
                                                                 <div className="flex gap-2 items-center">
@@ -163,7 +159,6 @@ export default function TeachingJournal() {
                                                                 </div>
                                                         </div>
 
-                                                        {/* BAGIAN UPLOAD FOTO */}
                                                         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
                                                                 <label className="block text-xs font-medium text-blue-800 dark:text-blue-300 mb-1">
                                                                         📸 Bukti Foto Mengajar (1 - 3 Foto)

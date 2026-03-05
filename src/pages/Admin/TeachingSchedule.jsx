@@ -4,7 +4,7 @@ import Badge from "../../components/ui/badge/Badge";
 
 export default function TeachingSchedule() {
         const { state, actions } = useTeachingSchedule();
-        const { data, teachers, classrooms, subjects, loading, modalOpen, isEditing, form } = state;
+        const { data, teachers, classrooms, subjects, loading, modalOpen, isEditing, form, currentPage, totalPages } = state;
 
         return (
                 <div className="p-6">
@@ -18,6 +18,7 @@ export default function TeachingSchedule() {
                                 </button>
                         </div>
 
+                        {/* TABEL DATA */}
                         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                                 <div className="max-w-full overflow-x-auto">
                                         <Table>
@@ -30,9 +31,12 @@ export default function TeachingSchedule() {
                                                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-right text-theme-xs dark:text-gray-400">Aksi</TableCell>
                                                         </TableRow>
                                                 </TableHeader>
-
                                                 <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                                        {data.length === 0 ? (
+                                                        {loading && !modalOpen ? (
+                                                                <TableRow>
+                                                                        <TableCell colSpan="5" className="text-center py-10 text-gray-500 text-theme-sm">Sedang memuat data...</TableCell>
+                                                                </TableRow>
+                                                        ) : data.length === 0 ? (
                                                                 <TableRow>
                                                                         <TableCell colSpan="5" className="text-center py-10 text-gray-500 text-theme-sm">Belum ada jadwal KBM.</TableCell>
                                                                 </TableRow>
@@ -61,6 +65,29 @@ export default function TeachingSchedule() {
                                                         )}
                                                 </TableBody>
                                         </Table>
+                                </div>
+
+                                {/* Navigasi Pagination */}
+                                <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
+                                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                Halaman <span className="font-semibold">{currentPage}</span> dari <span className="font-semibold">{totalPages}</span>
+                                        </span>
+                                        <div className="flex gap-2">
+                                                <button
+                                                        onClick={() => actions.setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                        disabled={currentPage === 1 || loading}
+                                                        className="px-3 py-1 rounded-md text-sm font-medium border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 dark:text-white"
+                                                >
+                                                        Sebelumnya
+                                                </button>
+                                                <button
+                                                        onClick={() => actions.setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                        disabled={currentPage === totalPages || loading}
+                                                        className="px-3 py-1 rounded-md text-sm font-medium border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 dark:text-white"
+                                                >
+                                                        Selanjutnya
+                                                </button>
+                                        </div>
                                 </div>
                         </div>
 
