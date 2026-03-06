@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
+import { BASE_URL } from '../../api';
 
 export const useLeaveRequest = () => {
         const [data, setData] = useState([]);
@@ -53,7 +54,7 @@ export const useLeaveRequest = () => {
         const getFileUrl = (path) => {
                 if (!path) return null;
                 const cleanPath = path.replace(/^\//, '');
-                return `http://127.0.0.1:8000/storage/${cleanPath}`;
+                return `${BASE_URL}/storage/${cleanPath}`;
         };
 
         return {

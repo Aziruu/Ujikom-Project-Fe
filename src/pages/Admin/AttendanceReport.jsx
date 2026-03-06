@@ -50,7 +50,7 @@ export default function AttendanceReport() {
                                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">Status</TableCell>
                                 </TableRow>
                             </TableHeader>
-                            
+
                             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                                 {loading ? (
                                     <TableRow>
@@ -74,7 +74,7 @@ export default function AttendanceReport() {
                                             </TableCell>
                                             <TableCell className="px-4 py-3 text-center">
                                                 <Badge size="sm" color={log.method === 'rfid' ? 'primary' : 'info'}>
-                                                    {log.method.toUpperCase()}
+                                                    {log.method ? log.method.toUpperCase() : 'N/A'}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="px-4 py-3 text-center font-mono text-gray-600 dark:text-gray-300 text-theme-sm">
@@ -82,7 +82,7 @@ export default function AttendanceReport() {
                                             </TableCell>
                                             <TableCell className="px-4 py-3 text-center">
                                                 <Badge size="sm" color={log.status === 'hadir' ? 'success' : log.status === 'telat' ? 'error' : 'warning'}>
-                                                    {log.status === 'telat' ? `Telat ${log.late_duration}m` : log.status.toUpperCase()}
+                                                    {log.status === 'telat' ? `Telat ${log.late_duration}m` : (log.status ? log.status.toUpperCase() : '-')}
                                                 </Badge>
                                             </TableCell>
                                         </TableRow>
