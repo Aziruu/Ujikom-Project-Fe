@@ -4,10 +4,17 @@ import api from '../api';
 export const useClassroom = () => {
         const [data, setData] = useState([]);
 
-        // State buat dropdown pilihan
+        // State buat dropdown pilihan statis
         const [majors, setMajors] = useState([]);
         const [academicYears, setAcademicYears] = useState([]);
+
+        // --- STATE KHUSUS CUSTOM DROPDOWN GURU ---
         const [teachers, setTeachers] = useState([]);
+        const [teacherSearch, setTeacherSearch] = useState('');
+        const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+        const [loadingTeachers, setLoadingTeachers] = useState(false);
+        const [teacherPage, setTeacherPage] = useState(1);
+        const [teacherTotalPages, setTeacherTotalPages] = useState(1);
 
         const [loading, setLoading] = useState(false);
         const [modalOpen, setModalOpen] = useState(false);
@@ -25,18 +32,16 @@ export const useClassroom = () => {
         const fetchData = async () => {
                 setLoading(true);
                 try {
-                        // Tarik 4 data sekaligus! Keren kan? 😎
-                        const [resClass, resMajors, resYears, resTeachers] = await Promise.all([
+                        // Tarik 3 data statis sekaligus (Teachers udah dipisah)
+                        const [resClass, resMajors, resYears] = await Promise.all([
                                 api.get('/classrooms'),
                                 api.get('/majors'),
-                                api.get('/academic-years'),
-                                api.get('/teachers?per_page=100')
+                                api.get('/academic-years')
                         ]);
 
                         setData(resClass.data.data);
                         setMajors(resMajors.data.data);
                         setAcademicYears(resYears.data.data);
-                        setTeachers(resTeachers.data.data || resTeachers.data);
                 } catch (err) {
                         console.error("Gagal tarik data kelas:", err);
                 } finally {
@@ -45,6 +50,54 @@ export const useClassroom = () => {
         };
 
         useEffect(() => { fetchData(); }, []);
+
+        // FETCH GURU UNTUK DROPDOWN (Bisa di-scroll)
+        useEffect(() => {
+                const fetchTeachersDropdown = async () => {
+                        setLoadingTeachers(true);
+                        try {
+                                const res = await api.get(`/teachers?search=${teacherSearch}&page=${teacherPage}`);
+                                if (teacherPage === 1) {
+                                        setTeachers(res.data.data);
+                                } else {
+                                        setTeachers(prev => [...prev, ...res.data.data]);
+                                }
+                                setTeacherTotalPages(res.data.meta ? res.data.meta.last_page : res.data.last_page);
+                        } catch (err) {
+                                console.error("Gagal cari guru:", err);
+                        } finally {
+                                setLoadingTeachers(false);
+                        }
+                };
+
+                const timer = setTimeout(() => fetchTeachersDropdown(), 500);
+                return () => clearTimeout(timer);
+        }, [teacherSearch, teacherPage]);
+
+        const handleTeacherScroll = (e) => {
+                const { scrollTop, clientHeight, scrollHeight } = e.target;
+                const isBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight - 50;
+
+                if (isBottom && !loadingTeachers) {
+                        if (teacherPage < teacherTotalPages) {
+                                setLoadingTeachers(true); // Kunci loading
+                                setTeacherPage(prev => prev + 1);
+                        }
+                }
+        };
+
+        const handleSearchTeacherInput = (val) => {
+                setLoadingTeachers(true);
+                setTeacherSearch(val);
+                setTeacherPage(1);
+                setIsDropdownOpen(true);
+        };
+
+        const selectTeacher = (id, name) => {
+                setForm(prev => ({ ...prev, homeroom_teacher_id: id }));
+                setTeacherSearch(name);
+                setIsDropdownOpen(false);
+        };
 
         const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -59,9 +112,14 @@ export const useClassroom = () => {
                                 academic_year_id: item.academic_year_id || '',
                                 homeroom_teacher_id: item.homeroom_teacher_id || ''
                         });
+                        // Set nama wali kelas di kotak pencarian kalau udah ada datanya
+                        setTeacherSearch(item.homeroom_teacher?.name || '');
                 } else {
                         setForm({ id: null, name: '', grade_level: '10', major_id: '', academic_year_id: '', homeroom_teacher_id: '' });
+                        setTeacherSearch('');
                 }
+                setTeacherPage(1);
+                setIsDropdownOpen(false);
                 setModalOpen(true);
         };
 
@@ -69,7 +127,6 @@ export const useClassroom = () => {
                 e.preventDefault();
                 setLoading(true);
                 try {
-                        // Pastikan data kosong jadi null biar backend nggak ngamuk
                         const payload = {
                                 ...form,
                                 homeroom_teacher_id: form.homeroom_teacher_id || null
@@ -79,7 +136,7 @@ export const useClassroom = () => {
                         fetchData();
                         setModalOpen(false);
                 } catch (err) {
-                        alert('Gagal menyimpan kelas. Cek semua inputannya ya!' + err.message);
+                        alert('Gagal menyimpan kelas. Cek semua inputannya ya! ' + err.message);
                 } finally {
                         setLoading(false);
                 }
@@ -91,13 +148,13 @@ export const useClassroom = () => {
                                 await api.delete(`/classrooms/${id}`);
                                 fetchData();
                         } catch (err) {
-                                alert('Gagal menghapus' + err.message);
+                                alert('Gagal menghapus ' + err.message);
                         }
                 }
         };
 
         return {
-                state: { data, majors, academicYears, teachers, loading, modalOpen, isEditing, form },
-                actions: { handleChange, openModal, setModalOpen, handleSubmit, handleDelete }
+                state: { data, majors, academicYears, teachers, loading, modalOpen, isEditing, form, teacherSearch, isDropdownOpen, loadingTeachers },
+                actions: { handleChange, openModal, setModalOpen, handleSubmit, handleDelete, handleSearchTeacherInput, handleTeacherScroll, selectTeacher, setIsDropdownOpen }
         };
 };

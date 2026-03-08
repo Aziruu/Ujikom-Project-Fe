@@ -4,7 +4,7 @@ import Badge from "../../components/ui/badge/Badge";
 
 export default function Classroom() {
     const { state, actions } = useClassroom();
-    const { data, majors, academicYears, teachers, loading, modalOpen, isEditing, form } = state;
+    const { data, majors, academicYears, teachers, loading, modalOpen, isEditing, form, teacherSearch, isDropdownOpen, loadingTeachers } = state;
 
     return (
         <div className="p-6">
@@ -15,9 +15,9 @@ export default function Classroom() {
                 </button>
             </div>
 
-            {/* Kontainer Tabel */}
+            {/* Kontainer Tabel Utama (Ditambah custom scrollbar tipis nan elegan) */}
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                <div className="max-w-full overflow-x-auto">
+                <div className="max-w-full overflow-x-auto [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full">
                     <Table>
                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                             <TableRow>
@@ -29,9 +29,9 @@ export default function Classroom() {
                                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-right text-theme-xs dark:text-gray-400">Aksi</TableCell>
                             </TableRow>
                         </TableHeader>
-                        
+
                         <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                            {loading ? (
+                            {loading && !modalOpen ? (
                                 <TableRow>
                                     <TableCell colSpan="6" className="text-center py-10 text-gray-500 text-theme-sm">Memuat data...</TableCell>
                                 </TableRow>
@@ -112,15 +112,51 @@ export default function Classroom() {
                                     </select>
                                 </div>
                             </div>
-                            <div>
+
+                            {/* CUSTOM DROPDOWN GURU UNTUK WALI KELAS */}
+                            <div className="relative">
                                 <label className="block text-xs font-medium text-gray-500 mb-1">Wali Kelas (Opsional)</label>
-                                <select name="homeroom_teacher_id" value={form.homeroom_teacher_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">-- Pilih Wali Kelas --</option>
-                                    {Array.isArray(teachers) && teachers.map(t => (
-                                        <option key={t.id} value={t.id}>{t.name}</option>
-                                    ))}
-                                </select>
+                                <input
+                                    type="text"
+                                    placeholder="🔍 Cari nama wali kelas..."
+                                    value={teacherSearch}
+                                    onChange={(e) => actions.handleSearchTeacherInput(e.target.value)}
+                                    onFocus={() => actions.setIsDropdownOpen(true)}
+                                    className="w-full p-2 text-sm border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+
+                                {isDropdownOpen && (
+                                    <div
+                                        className="absolute z-[60] w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                        onScroll={actions.handleTeacherScroll}
+                                    >
+                                        {teachers.length === 0 && !loadingTeachers ? (
+                                            <div className="p-3 text-sm text-gray-500 text-center">Tidak ada guru ditemukan</div>
+                                        ) : (
+                                            teachers.map(t => (
+                                                <div
+                                                    key={t.id}
+                                                    onClick={() => actions.selectTeacher(t.id, t.name)}
+                                                    className={`p-3 text-sm cursor-pointer border-b border-gray-50 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 transition ${form.homeroom_teacher_id === t.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold' : 'dark:text-gray-200'}`}
+                                                >
+                                                    {t.name} <span className="text-xs text-gray-400 block">{t.nip || 'Belum ada NIP'}</span>
+                                                </div>
+                                            ))
+                                        )}
+
+                                        {loadingTeachers && (
+                                            <div className="p-2 text-center text-xs font-medium text-blue-500 animate-pulse bg-gray-50 dark:bg-gray-800">
+                                                Memuat data lagi... ⏳
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {isDropdownOpen && (
+                                    <div className="fixed inset-0 z-40" onClick={() => actions.setIsDropdownOpen(false)}></div>
+                                )}
                             </div>
+
                             <div className="flex justify-end gap-2 pt-4">
                                 <button type="button" onClick={() => actions.setModalOpen(false)} className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">Batal</button>
                                 <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50">

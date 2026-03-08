@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../compon
 
 export default function Major() {
         const { state, actions } = useMajor();
-        const { data, loading, modalOpen, isEditing, form, currentPage, totalPages, totalData, searchTerm, teachers, teacherSearch } = state;
+        const { data, loading, modalOpen, isEditing, form, currentPage, totalPages, totalData, searchTerm, teachers, teacherSearch, isDropdownOpen, loadingTeachers } = state;
 
         return (
                 <>
@@ -35,9 +35,9 @@ export default function Major() {
                                         </div>
                                 </div>
 
-                                {/* Kontainer Tabel Menggunakan Komponen Template */}
+                                {/* Kontainer Tabel Utama (Ditambah custom scrollbar tipis nan elegan) */}
                                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                                        <div className="max-w-full overflow-x-auto">
+                                        <div className="max-w-full overflow-x-auto [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full">
                                                 <Table>
                                                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                                                                 <TableRow>
@@ -121,26 +121,56 @@ export default function Major() {
                                                                         <input type="text" name="name" value={form.name} onChange={actions.handleChange} placeholder="Contoh: Rekayasa Perangkat Lunak" className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
                                                                 </div>
 
+                                                                {/* CUSTOM DROPDOWN GURU UNTUK KEPALA JURUSAN */}
                                                                 <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600">
                                                                         <label className="block text-xs font-medium text-gray-500 mb-2">Pilih Kepala Jurusan (Opsional)</label>
-                                                                        <input
-                                                                                type="text"
-                                                                                placeholder="Pencarian nama guru..."
-                                                                                value={teacherSearch}
-                                                                                onChange={(e) => actions.setTeacherSearch(e.target.value)}
-                                                                                className="w-full p-2 text-xs mb-2 border rounded-lg bg-white dark:bg-gray-900 dark:border-gray-600 dark:text-white outline-none"
-                                                                        />
-                                                                        <select name="head_of_program_id" value={form.head_of_program_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                                                                <option value="">-- Kosongkan atau Pilih Kepala Jurusan --</option>
-                                                                                {Array.isArray(teachers) && teachers.map(t => (
-                                                                                        <option key={t.id} value={t.id}>{t.name} {t.nip ? `(${t.nip})` : ''}</option>
-                                                                                ))}
-                                                                        </select>
+                                                                        <div className="relative">
+                                                                                <input
+                                                                                        type="text"
+                                                                                        placeholder="🔍 Cari nama guru..."
+                                                                                        value={teacherSearch}
+                                                                                        onChange={(e) => actions.handleSearchTeacherInput(e.target.value)}
+                                                                                        onFocus={() => actions.setIsDropdownOpen(true)}
+                                                                                        className="w-full p-2 text-xs border rounded-lg bg-white dark:bg-gray-900 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                                                                />
+
+                                                                                {isDropdownOpen && (
+                                                                                        <div
+                                                                                                className="absolute z-[60] w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                                                                                onScroll={actions.handleTeacherScroll}
+                                                                                        >
+                                                                                                {teachers.length === 0 && !loadingTeachers ? (
+                                                                                                        <div className="p-3 text-sm text-gray-500 text-center">Tidak ada guru ditemukan</div>
+                                                                                                ) : (
+                                                                                                        teachers.map(t => (
+                                                                                                                <div
+                                                                                                                        key={t.id}
+                                                                                                                        onClick={() => actions.selectTeacher(t.id, t.name)}
+                                                                                                                        className={`p-3 text-sm cursor-pointer border-b border-gray-50 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 transition ${form.head_of_program_id === t.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold' : 'dark:text-gray-200'}`}
+                                                                                                                >
+                                                                                                                        {t.name} <span className="text-xs text-gray-400 block">{t.nip || 'Belum ada NIP'}</span>
+                                                                                                                </div>
+                                                                                                        ))
+                                                                                                )}
+
+                                                                                                {loadingTeachers && (
+                                                                                                        <div className="p-2 text-center text-xs font-medium text-blue-500 animate-pulse bg-gray-50 dark:bg-gray-800">
+                                                                                                                Memuat data... ⏳
+                                                                                                        </div>
+                                                                                                )}
+                                                                                        </div>
+                                                                                )}
+
+                                                                                {/* Overlay Transparan */}
+                                                                                {isDropdownOpen && (
+                                                                                        <div className="fixed inset-0 z-40" onClick={() => actions.setIsDropdownOpen(false)}></div>
+                                                                                )}
+                                                                        </div>
                                                                 </div>
 
                                                                 <div className="flex justify-end gap-3 pt-4">
-                                                                        <button type="button" onClick={() => actions.setModalOpen(false)} className="px-4 py-2 text-gray-600 dark:text-gray-300">Batal</button>
-                                                                        <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                                                        <button type="button" onClick={() => actions.setModalOpen(false)} className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition">Batal</button>
+                                                                        <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
                                                                                 {loading ? 'Menyimpan...' : 'Simpan Data'}
                                                                         </button>
                                                                 </div>

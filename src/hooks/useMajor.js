@@ -22,9 +22,13 @@ export const useMajor = () => {
                 head_of_program_id: ''
         });
 
-        // State Dropdown Guru (Kepala Jurusan)
+        // --- STATE KHUSUS CUSTOM DROPDOWN GURU ---
         const [teachers, setTeachers] = useState([]);
         const [teacherSearch, setTeacherSearch] = useState('');
+        const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+        const [loadingTeachers, setLoadingTeachers] = useState(false);
+        const [teacherPage, setTeacherPage] = useState(1);
+        const [teacherTotalPages, setTeacherTotalPages] = useState(1);
 
         // Pemanggilan Data Utama (Jurusan)
         const fetchMajors = async (page = 1, search = '') => {
@@ -51,20 +55,53 @@ export const useMajor = () => {
                 return () => clearTimeout(timer);
         }, [currentPage, searchTerm]);
 
-        // Pemanggilan Data Guru untuk Dropdown
+        // FETCH GURU UNTUK DROPDOWN (Bisa di-scroll)
         useEffect(() => {
-                const fetchTeachers = async () => {
+                const fetchTeachersDropdown = async () => {
+                        setLoadingTeachers(true);
                         try {
-                                const response = await api.get(`/teachers?search=${teacherSearch}`);
-                                setTeachers(response.data.data);
-                        } catch (error) {
-                                console.error("Kesalahan saat memuat data guru:", error);
+                                const res = await api.get(`/teachers?search=${teacherSearch}&page=${teacherPage}`);
+                                if (teacherPage === 1) {
+                                        setTeachers(res.data.data);
+                                } else {
+                                        setTeachers(prev => [...prev, ...res.data.data]);
+                                }
+                                setTeacherTotalPages(res.data.meta ? res.data.meta.last_page : res.data.last_page);
+                        } catch (err) {
+                                console.error("Gagal cari guru:", err);
+                        } finally {
+                                setLoadingTeachers(false);
                         }
                 };
 
-                const timer = setTimeout(() => fetchTeachers(), 500);
+                const timer = setTimeout(() => fetchTeachersDropdown(), 500);
                 return () => clearTimeout(timer);
-        }, [teacherSearch]);
+        }, [teacherSearch, teacherPage]);
+
+        const handleTeacherScroll = (e) => {
+                const { scrollTop, clientHeight, scrollHeight } = e.target;
+                const isBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight - 50;
+
+                if (isBottom && !loadingTeachers) {
+                        if (teacherPage < teacherTotalPages) {
+                                setLoadingTeachers(true);
+                                setTeacherPage(prev => prev + 1);
+                        }
+                }
+        };
+
+        const handleSearchTeacherInput = (val) => {
+                setLoadingTeachers(true);
+                setTeacherSearch(val);
+                setTeacherPage(1);
+                setIsDropdownOpen(true);
+        };
+
+        const selectTeacher = (id, name) => {
+                setForm(prev => ({ ...prev, head_of_program_id: id }));
+                setTeacherSearch(name);
+                setIsDropdownOpen(false);
+        };
 
         // Pengendali Peristiwa (Handlers)
         const handleSearchChange = (e) => {
@@ -85,11 +122,13 @@ export const useMajor = () => {
                                 name: item.name,
                                 head_of_program_id: item.head_of_program_id || ''
                         });
-                        setTeacherSearch('');
+                        setTeacherSearch(item.head_of_program?.name || '');
                 } else {
                         setForm({ id: null, code: '', name: '', head_of_program_id: '' });
                         setTeacherSearch('');
                 }
+                setTeacherPage(1);
+                setIsDropdownOpen(false);
                 setModalOpen(true);
         };
 
@@ -124,7 +163,7 @@ export const useMajor = () => {
         };
 
         return {
-                state: { data, loading, modalOpen, isEditing, form, currentPage, totalPages, totalData, searchTerm, teachers, teacherSearch },
-                actions: { handleSearchChange, handleChange, openModal, setModalOpen, handleSubmit, handleDelete, setCurrentPage, setTeacherSearch }
+                state: { data, loading, modalOpen, isEditing, form, currentPage, totalPages, totalData, searchTerm, teachers, teacherSearch, isDropdownOpen, loadingTeachers },
+                actions: { handleSearchChange, handleChange, openModal, setModalOpen, handleSubmit, handleDelete, setCurrentPage, handleSearchTeacherInput, handleTeacherScroll, selectTeacher, setIsDropdownOpen }
         };
 };
