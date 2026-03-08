@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Link, useLocation } from "react-router"
+import { Link, useLocation } from "react-router" // Kembali pakai react-router bawaan template
 
-// Assume these icons are imported from an icon library
+// Pastikan path icons ini sesuai dengan folder kamu ya sayang
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -9,8 +9,6 @@ import {
   GridIcon,
   HorizontaLDots,
   ListIcon,
-  PageIcon,
-  PieChartIcon,
   PlugInIcon,
   TableIcon,
   UserCircleIcon
@@ -18,130 +16,63 @@ import {
 import { useSidebar } from "../context/SidebarContext"
 import SidebarWidget from "./SidebarWidget"
 
+// ==========================================
+// 1. MENU UTAMA YANG UDAH KAKAK RAPIHKAN
+// ==========================================
 const navItems = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }]
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar"
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile"
-  },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }]
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }]
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false }
-    ]
-  },
-  {
-    icon: <UserCircleIcon />, // Pakai icon user yg udah ada
-    name: "Data Guru",
-    path: "/teachers"
-  },
-  {
-    icon: <ListIcon />, // Pakai icon list yg udah ada
-    name: "Absensi",
-    path: "/attendance"
-  },
-  {
-    icon: <TableIcon />, // Atau icon lain yang cocok
-    name: "Laporan Log",
-    path: "/report"
-  },
-  {
-    icon: <PageIcon />, // Atau icon lain yg sesuai
-    name: "Pengajuan Cuti",
-    path: "/leaves"
-  },
-  {
-    icon: <TableIcon />,
-    name: "Tahun Ajar",
-    path: "/academic-years"
-  },
-  {
-    icon: <TableIcon />,
-    name: "Jurusan",
-    path: "/majors"
-  },
-  {
-    icon: <TableIcon />,
-    name: "Mata Pelajaran",
-    path: "/subjects"
-  },
-  {
-    icon: <TableIcon />,
-    name: "Kelas",
-    path: "/classrooms"
-  },
-  {
-    icon: <TableIcon />,
-    name: "Jadwal Bekerja",
-    path: "/work-schedules"
-  },
-  {
-    icon: <TableIcon />,
-    name: "Jadwal Mengajar",
-    path: "/teaching-schedules"
-  },
-  {
-    icon: <TableIcon />,
-    name: "Jurnal Guru",
-    path: "/teaching-journals"
-  },
-   {
-    icon: <TableIcon />,
-    name: "Lokasi Absen",
-    path: "/school-locations"
-  }
-]
-
-const othersItems = [
-  {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false }
-    ]
+    path: "/"
   },
   {
     icon: <BoxCubeIcon />,
-    name: "UI Elements",
+    name: "Kiosk Absensi",
+    path: "/attendance"
+  },
+  {
+    name: "Log & Laporan",
+    icon: <ListIcon />,
     subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false }
+      { name: "Laporan Absensi", path: "/report" },
+      { name: "Pengajuan Cuti", path: "/leaves" },
+      { name: "Jurnal Mengajar", path: "/teaching-journals" }
     ]
   },
   {
-    icon: <PlugInIcon />,
-    name: "Authentication",
+    name: "Jadwal",
+    icon: <CalenderIcon />,
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false }
+      { name: "Jadwal Bekerja", path: "/work-schedules" },
+      { name: "Jadwal Mengajar", path: "/teaching-schedules" }
     ]
+  },
+  {
+    name: "Data Master",
+    icon: <TableIcon />,
+    subItems: [
+      { name: "Data Guru", path: "/teachers" },
+      { name: "Data Kelas", path: "/classrooms" },
+      { name: "Data Jurusan", path: "/majors" },
+      { name: "Mata Pelajaran", path: "/subjects" },
+      { name: "Tahun Ajar", path: "/academic-years" }
+    ]
+  }
+]
+
+// ==========================================
+// 2. MENU PENGATURAN LAINNYA
+// ==========================================
+const othersItems = [
+  {
+    icon: <PlugInIcon />,
+    name: "Lokasi Peta (GPS)",
+    path: "/school-locations"
+  },
+  {
+    icon: <UserCircleIcon />,
+    name: "Profil Admin",
+    path: "/profile"
   }
 ]
 
@@ -153,7 +84,6 @@ const AppSidebar = () => {
   const [subMenuHeight, setSubMenuHeight] = useState({})
   const subMenuRefs = useRef({})
 
-  // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(path => location.pathname === path, [
     location.pathname
   ])
@@ -166,7 +96,6 @@ const AppSidebar = () => {
           if (nav.subItems) {
             nav.subItems.forEach(subItem => {
               if (isActive(subItem.path)) {
-                // FIX: Bungkus pakai setTimeout biar ga error "synchronous"
                 setTimeout(() => {
                   setOpenSubmenu({
                     type: menuType,
@@ -181,7 +110,6 @@ const AppSidebar = () => {
       })
 
     if (!submenuMatched) {
-      // FIX: Ini juga bungkus setTimeout
       setTimeout(() => {
         setOpenSubmenu(null)
       }, 0)
@@ -294,28 +222,6 @@ const AppSidebar = () => {
                         }`}
                     >
                       {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${isActive(subItem.path)
-                              ? "menu-dropdown-badge-active"
-                              : "menu-dropdown-badge-inactive"
-                              } menu-dropdown-badge`}
-                          >
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${isActive(subItem.path)
-                              ? "menu-dropdown-badge-active"
-                              : "menu-dropdown-badge-inactive"
-                              } menu-dropdown-badge`}
-                          >
-                            pro
-                          </span>
-                        )}
-                      </span>
                     </Link>
                   </li>
                 ))}
@@ -384,7 +290,7 @@ const AppSidebar = () => {
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  "Menu Utama"
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
@@ -399,7 +305,7 @@ const AppSidebar = () => {
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  "Pengaturan"
                 ) : (
                   <HorizontaLDots />
                 )}
@@ -408,6 +314,7 @@ const AppSidebar = () => {
             </div>
           </div>
         </nav>
+        {/* Iklan bawaan template dipanggil di sini, tapi tenang udah kita basmi di bawah! */}
         {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
