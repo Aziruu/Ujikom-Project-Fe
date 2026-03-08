@@ -13,6 +13,11 @@ export const useTeachingJournal = () => {
         // State modal foto
         const [viewPhotos, setViewPhotos] = useState(null);
 
+        const [teacherPage, setTeacherPage] = useState(1);
+        const [teacherTotalPages, setTeacherTotalPages] = useState(1);
+        const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+        const [loadingTeachers, setLoadingTeachers] = useState(false);
+
         // State Cari Guru
         const [teacherSearch, setTeacherSearch] = useState('');
 
@@ -51,19 +56,59 @@ export const useTeachingJournal = () => {
         //  Use Effect Pencarian Guru
         useEffect(() => {
                 const fetchTeachers = async () => {
+                        setLoadingTeachers(true);
                         try {
-                                // Minta data 10 guru aja, ditambah filter pencarian kalau ada
-                                const res = await api.get(`/teachers?search=${teacherSearch}`);
-                                setTeachers(res.data.data);
+                                const res = await api.get(`/teachers?search=${teacherSearch}&page=${teacherPage}`);
+
+                                // Kalau halaman 1 (baru buka / ngetik pencarian), timpa data
+                                if (teacherPage === 1) {
+                                        setTeachers(res.data.data);
+                                } else {
+                                        // Kalau halaman > 1 (hasil scroll), gabungin data
+                                        setTeachers(prev => [...prev, ...res.data.data]);
+                                }
+
+                                setTeacherTotalPages(res.data.meta ? res.data.meta.last_page : res.data.last_page);
                         } catch (err) {
                                 console.error("Gagal cari guru:", err);
+                        } finally {
+                                setLoadingTeachers(false);
                         }
                 };
 
-                // Delay 500ms biar nggak ngirim request tiap ketik 1 huruf (Debounce)
                 const timer = setTimeout(() => fetchTeachers(), 500);
                 return () => clearTimeout(timer);
-        }, [teacherSearch]);
+        }, [teacherSearch, teacherPage]);
+
+        // FUNGSI DETEKSI SCROLL MENTOK DI DROPDOWN GURU
+        const handleTeacherScroll = (e) => {
+                const { scrollTop, clientHeight, scrollHeight } = e.target;
+
+                // Kasih toleransi 50px sebelum mentok banget
+                const isBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight - 50;
+
+                if (isBottom && !loadingTeachers) {
+                        if (teacherPage < teacherTotalPages) {
+                                setLoadingTeachers(true);
+                                setTeacherPage(prev => prev + 1);
+                        }
+                }
+        };
+
+        // Fungsi kalau kamu ngetik di search bar guru
+        const handleSearchTeacherInput = (val) => {
+                setLoadingTeachers(true);
+                setTeacherSearch(val);
+                setTeacherPage(1); // Reset ke halaman 1 kalau ngetik
+                setIsDropdownOpen(true);
+        };
+
+        // Fungsi pas milih guru dari list
+        const selectTeacher = (id, name) => {
+                setForm(prev => ({ ...prev, teacher_id: id }));
+                setTeacherSearch(name); // Teks di input berubah jadi nama guru yang dipilih
+                setIsDropdownOpen(false); // Tutup dropdown
+        };
 
         const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -153,7 +198,7 @@ export const useTeachingJournal = () => {
         };
 
         return {
-                state: { data, teachers, classrooms, schedules, loading, modalOpen, form, photos, viewPhotos, teacherSearch },
-                actions: { handleChange, handleFileChange, getLocation, openModal, setModalOpen, handleSubmit, handleVerify, handleDelete, setViewPhotos, setTeacherSearch }
+                state: { data, teachers, classrooms, schedules, loading, modalOpen, form, photos, viewPhotos, teacherSearch, isDropdownOpen, loadingTeachers },
+                actions: { handleChange, handleFileChange, getLocation, openModal, setModalOpen, handleSubmit, handleVerify, handleDelete, setViewPhotos, handleSearchTeacherInput, handleTeacherScroll, selectTeacher, setIsDropdownOpen }
         };
 };

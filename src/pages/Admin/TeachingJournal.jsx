@@ -67,7 +67,7 @@ export default function TeachingJournal() {
                                                                                                                 onClick={() => actions.setViewPhotos(photoArray)}
                                                                                                                 className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 mx-auto"
                                                                                                         >
-                                                                                                                👁️ {photoArray.length} Foto
+                                                                                                                {photoArray.length} Foto
                                                                                                         </button>
                                                                                                 ) : (
                                                                                                         <span className="text-gray-400 text-xs">-</span>
@@ -105,18 +105,55 @@ export default function TeachingJournal() {
                                                         <div className="grid grid-cols-2 gap-4">
                                                                 <div className="relative">
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Pilih Guru</label>
+
+                                                                        {/* Input yang berfungsi sebagai Search Bar sekaligus pemicu buka Dropdown */}
                                                                         <input
                                                                                 type="text"
-                                                                                placeholder="🔍 Cari nama guru..."
-                                                                                value={state.teacherSearch || ''}
-                                                                                onChange={(e) => actions.setTeacherSearch(e.target.value)}
-                                                                                className="w-full p-2 text-xs mb-2 border rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                                                                placeholder="Ketik & cari guru..."
+                                                                                value={state.teacherSearch}
+                                                                                onChange={(e) => actions.handleSearchTeacherInput(e.target.value)}
+                                                                                onFocus={() => actions.setIsDropdownOpen(true)}
+                                                                                className="w-full p-2 text-sm border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                                                                         />
-                                                                        <select name="teacher_id" value={form.teacher_id} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" required>
-                                                                                <option value="">-- Hasil Pencarian ({Array.isArray(teachers) ? teachers.length : 0}) --</option>
-                                                                                {Array.isArray(teachers) && teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                                                        </select>
+
+                                                                        {/* List Dropdown Custom yang muncul kalau input di-klik */}
+                                                                        {state.isDropdownOpen && (
+                                                                                <div
+                                                                                        className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto"
+                                                                                        onScroll={actions.handleTeacherScroll} // Deteksi scroll infinite di sini!
+                                                                                >
+                                                                                        {teachers.length === 0 && !state.loadingTeachers ? (
+                                                                                                <div className="p-3 text-sm text-gray-500 text-center">Tidak ada guru ditemukan</div>
+                                                                                        ) : (
+                                                                                                teachers.map(t => (
+                                                                                                        <div
+                                                                                                                key={t.id}
+                                                                                                                onClick={() => actions.selectTeacher(t.id, t.name)}
+                                                                                                                className={`p-3 text-sm cursor-pointer border-b border-gray-50 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 transition ${form.teacher_id === t.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold' : 'dark:text-gray-200'}`}
+                                                                                                        >
+                                                                                                                {t.name} <span className="text-xs text-gray-400 block">{t.nip || 'Belum ada NIP'}</span>
+                                                                                                        </div>
+                                                                                                ))
+                                                                                        )}
+
+                                                                                        {/* Indikator Loading di bawah list pas lagi nge-scroll */}
+                                                                                        {state.loadingTeachers && (
+                                                                                                <div className="p-2 text-center text-xs font-medium text-blue-500 animate-pulse bg-gray-50 dark:bg-gray-800">
+                                                                                                        Memuat data lagi... ⏳
+                                                                                                </div>
+                                                                                        )}
+                                                                                </div>
+                                                                        )}
+
+                                                                        {/* Latar transparan buat nutup dropdown kalau ngeklik area luar */}
+                                                                        {state.isDropdownOpen && (
+                                                                                <div
+                                                                                        className="fixed inset-0 z-40"
+                                                                                        onClick={() => actions.setIsDropdownOpen(false)}
+                                                                                ></div>
+                                                                        )}
                                                                 </div>
+
                                                                 <div>
                                                                         <label className="block text-xs font-medium text-gray-500 mb-1">Tanggal</label>
                                                                         <input type="date" name="date" value={form.date} onChange={actions.handleChange} className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" required />

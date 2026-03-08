@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
-import { BASE_URL } from '../../api';
+import { BASE_URL } from '../api';
 
 export const useLeaveRequest = () => {
         const [data, setData] = useState([]);

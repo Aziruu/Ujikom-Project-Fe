@@ -11,6 +11,11 @@ export const useTeachingSchedule = () => {
         const [classrooms, setClassrooms] = useState([]);
         const [subjects, setSubjects] = useState([]);
 
+        const [teacherPage, setTeacherPage] = useState(1);
+        const [teacherTotalPages, setTeacherTotalPages] = useState(1);
+        const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+        const [loadingTeachers, setLoadingTeachers] = useState(false);
+
         // --- STATE PENCARIAN GURU DI DALAM MODAL ---
         const [teacherSearch, setTeacherSearch] = useState('');
 
@@ -52,19 +57,60 @@ export const useTeachingSchedule = () => {
 
         // 2. Fetch data GURU khusus buat dropdown (Jalan tiap kali ngetik di search bar modal)
         useEffect(() => {
-                const fetchTeachersForDropdown = async () => {
+                const fetchTeachers = async () => {
+                        setLoadingTeachers(true);
                         try {
-                                // Cuma narik 10 data, ditambah filter nama kalau teacherSearch ada isinya
-                                const res = await api.get(`/teachers?search=${teacherSearch}`);
-                                setTeachers(res.data.data);
+                                const res = await api.get(`/teachers?search=${teacherSearch}&page=${teacherPage}`);
+
+                                // Kalau halaman 1 (baru buka / ngetik pencarian), timpa data
+                                if (teacherPage === 1) {
+                                        setTeachers(res.data.data);
+                                } else {
+                                        // Kalau halaman > 1 (hasil scroll), gabungin data
+                                        setTeachers(prev => [...prev, ...res.data.data]);
+                                }
+
+                                setTeacherTotalPages(res.data.meta ? res.data.meta.last_page : res.data.last_page);
                         } catch (err) {
                                 console.error("Gagal cari guru:", err);
+                        } finally {
+                                setLoadingTeachers(false);
                         }
                 };
 
-                const timer = setTimeout(() => fetchTeachersForDropdown(), 500);
+                const timer = setTimeout(() => fetchTeachers(), 500);
                 return () => clearTimeout(timer);
-        }, [teacherSearch]);
+        }, [teacherSearch, teacherPage]);
+
+        // FUNGSI DETEKSI SCROLL MENTOK DI DROPDOWN GURU
+        const handleTeacherScroll = (e) => {
+                const { scrollTop, clientHeight, scrollHeight } = e.target;
+
+                // Kasih toleransi 50px sebelum mentok banget
+                const isBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight - 50;
+
+                if (isBottom && !loadingTeachers) {
+                        if (teacherPage < teacherTotalPages) {
+                                setLoadingTeachers(true);
+                                setTeacherPage(prev => prev + 1);
+                        }
+                }
+        };
+
+        // Fungsi kalau kamu ngetik di search bar guru
+        const handleSearchTeacherInput = (val) => {
+                setLoadingTeachers(true);
+                setTeacherSearch(val);
+                setTeacherPage(1); // Reset ke halaman 1 kalau ngetik
+                setIsDropdownOpen(true);
+        };
+
+        // Fungsi pas milih guru dari list
+        const selectTeacher = (id, name) => {
+                setForm(prev => ({ ...prev, teacher_id: id }));
+                setTeacherSearch(name); // Teks di input berubah jadi nama guru yang dipilih
+                setIsDropdownOpen(false); // Tutup dropdown
+        };
 
         // 3. Fetch data Tabel Utama Jadwal
         const fetchSchedules = async (page = 1, search = '') => {
@@ -150,7 +196,7 @@ export const useTeachingSchedule = () => {
         };
 
         return {
-                state: { data, teachers, classrooms, subjects, loading, modalOpen, isEditing, form, currentPage, totalPages, totalData, searchTerm, teacherSearch },
-                actions: { handleChange, handleSearchChange, openModal, setModalOpen, handleSubmit, handleDelete, setCurrentPage, setTeacherSearch }
+                state: { data, teachers, classrooms, subjects, loading, modalOpen, isEditing, form, currentPage, totalPages, totalData, searchTerm, teacherSearch,  isDropdownOpen, loadingTeachers },
+                actions: { handleChange, handleSearchChange, openModal, setModalOpen, handleSubmit, handleDelete, setCurrentPage,handleSearchTeacherInput, handleTeacherScroll, selectTeacher, setIsDropdownOpen }
         };
 };
