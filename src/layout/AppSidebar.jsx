@@ -27,7 +27,7 @@ const navItems = [
   },
   {
     icon: <BoxCubeIcon />,
-    name: "Kiosk Absensi",
+    name: "Absensi",
     path: "/attendance"
   },
   {
