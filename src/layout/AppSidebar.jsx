@@ -106,6 +106,11 @@ const navItems = [
     icon: <TableIcon />,
     name: "Jurnal Guru",
     path: "/teaching-journals"
+  },
+   {
+    icon: <TableIcon />,
+    name: "Lokasi Absen",
+    path: "/school-locations"
   }
 ]
 
