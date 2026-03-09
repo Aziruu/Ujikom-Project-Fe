@@ -44,8 +44,8 @@ export default function LeaveRequests() {
                     <input
                         type="date"
                         value={filterDate}
-                        onChange={(e) => actions.setFilterDate(e.target.value)}
-                        className="border border-gray-300 dark:border-gray-700 p-2 rounded-lg text-sm bg-white dark:bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                        onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                        className="border border-gray-300 dark:border-gray-700 p-2 pr-4 rounded-lg text-sm bg-white dark:bg-gray-800 outline-none focus:ring-2 focus:ring-blue-500 dark:text-white cursor-pointer"
                     />
 
                     {filterDate && (
