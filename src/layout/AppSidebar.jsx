@@ -6,6 +6,8 @@ import {
   BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
+  FileIcon,
+  FolderIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -15,6 +17,7 @@ import {
 } from "../icons"
 import { useSidebar } from "../context/SidebarContext"
 import SidebarWidget from "./SidebarWidget"
+import { MapIcon } from "lucide-react"
 // import { icon } from "leaflet"
 
 // ==========================================
@@ -61,7 +64,7 @@ const navItems = [
   },
   {
     name: "Penilaian Guru",
-    icon: <HorizontaLDots />,
+    icon: <FileIcon />,
     subItems: [
       { name: "Assessment Category", path: "/assessment-categories" },
       { name: "Assessment", path: "/assessments" },
@@ -70,7 +73,7 @@ const navItems = [
   },
   {
     name: "Dompet Integritas", 
-    icon: <HorizontaLDots />,
+    icon: <FolderIcon />,
     subItems: [
       { name: "Leaderboard", path: "/leaderboard" },
       { name: "Katalog Reward", path: "/marketplace" },
@@ -84,7 +87,7 @@ const navItems = [
 // ==========================================
 const othersItems = [
   {
-    icon: <PlugInIcon />,
+    icon: <MapIcon />,
     name: "Lokasi Peta (GPS)",
     path: "/school-locations"
   },

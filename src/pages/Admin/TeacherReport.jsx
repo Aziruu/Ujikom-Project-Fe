@@ -12,6 +12,23 @@ import {
 import { User, MessageSquare, BarChart3, ChevronDown } from 'lucide-react';
 import { useTeacherReport } from '../../hooks/useTeacherReport';
 
+// Custom Tooltip untuk Radar Chart agar lebih informatif
+const CustomTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+                return (
+                        <div className="bg-white dark:bg-gray-800 p-3 shadow-xl rounded-lg border border-gray-100 dark:border-gray-700">
+                                <p className="text-sm font-bold text-gray-800 dark:text-white">
+                                        {payload[0].payload.category}
+                                </p>
+                                <p className="text-sm text-blue-600 font-semibold">
+                                        Skor: {payload[0].value} / 5
+                                </p>
+                        </div>
+                );
+        }
+        return null;
+};
+
 const TeacherReportPage = () => {
         const { teacherId } = useParams();
         const navigate = useNavigate();
@@ -22,23 +39,6 @@ const TeacherReportPage = () => {
                 if (selectedId) {
                         navigate(`/assessments/history/${selectedId}`);
                 }
-        };
-
-        // Custom Tooltip untuk Radar Chart agar lebih informatif
-        const CustomTooltip = ({ active, payload }) => {
-                if (active && payload && payload.length) {
-                        return (
-                                <div className="bg-white dark:bg-gray-800 p-3 shadow-xl rounded-lg border border-gray-100 dark:border-gray-700">
-                                        <p className="text-sm font-bold text-gray-800 dark:text-white">
-                                                {payload[0].payload.category}
-                                        </p>
-                                        <p className="text-sm text-blue-600 font-semibold">
-                                                Skor: {payload[0].value} / 5
-                                        </p>
-                                </div>
-                        );
-                }
-                return null;
         };
 
         return (
@@ -156,7 +156,8 @@ const TeacherReportPage = () => {
                                                 <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-[2rem] p-8 shadow-sm border border-gray-100 dark:border-gray-700">
                                                         <div className="flex items-center gap-3 mb-8">
                                                                 <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg text-purple-600">
-                                                                        <MessageqSuare size={20} />
+                                                                        {/* 2. TYPO MessageqSuare DIPERBAIKI MENJADI MessageSquare */}
+                                                                        <MessageSquare size={20} />
                                                                 </div>
                                                                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">Riwayat Feedback</h2>
                                                         </div>
