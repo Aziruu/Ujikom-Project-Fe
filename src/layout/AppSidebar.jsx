@@ -15,9 +15,10 @@ import {
 } from "../icons"
 import { useSidebar } from "../context/SidebarContext"
 import SidebarWidget from "./SidebarWidget"
+// import { icon } from "leaflet"
 
 // ==========================================
-// 1. MENU UTAMA YANG UDAH KAKAK RAPIHKAN
+// MENU UTAMA
 // ==========================================
 const navItems = [
   {
@@ -57,11 +58,29 @@ const navItems = [
       { name: "Mata Pelajaran", path: "/subjects" },
       { name: "Tahun Ajar", path: "/academic-years" }
     ]
+  },
+  {
+    name: "Penilaian Guru",
+    icon: <HorizontaLDots />,
+    subItems: [
+      { name: "Assessment Category", path: "/assessment-categories" },
+      { name: "Assessment", path: "/assessments" },
+      { name: "Assessment History", path: "/assessments/history" },
+    ]
+  },
+  {
+    name: "Dompet Integritas", 
+    icon: <HorizontaLDots />,
+    subItems: [
+      { name: "Leaderboard", path: "/leaderboard" },
+      { name: "Katalog Reward", path: "/marketplace" },
+      { name: "Rule Point", path: "/rule_point" },
+    ]
   }
 ]
 
 // ==========================================
-// 2. MENU PENGATURAN LAINNYA
+// MENU PENGATURAN LAINNYA
 // ==========================================
 const othersItems = [
   {
@@ -255,15 +274,15 @@ const AppSidebar = () => {
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
+                className="dark:hidden ms-5"
+                src="/images/logo/kuroku.svg"
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                className="hidden dark:block ms-5"
+                src="/images/logo/kuroku-dark.svg"
                 alt="Logo"
                 width={150}
                 height={40}
@@ -271,7 +290,7 @@ const AppSidebar = () => {
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              src="/images/logo/kuroku-icon.svg"
               alt="Logo"
               width={32}
               height={32}
