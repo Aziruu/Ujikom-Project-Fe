@@ -32,6 +32,12 @@ import WorkSchedule from "./pages/Admin/WorkSchedule"
 import TeachingSchedule from "./pages/Admin/TeachingSchedule"
 import TeachingJournal from "./pages/Admin/TeachingJournal"
 import SchoolLocation from "./pages/Admin/SchoolLocation"
+import AssessmentCategoryPage from "./pages/Admin/AssessmentCategoryPage"
+import AssessmentDashboard from "./pages/Admin/AssessmentDashoard"
+import TeacherReportPage from "./pages/Admin/TeacherReport"
+import Marketplace from "./pages/Admin/Marketplace"
+import Leaderboard from "./pages/Admin/Leaderboard"
+import PointRule from "./pages/Admin/PointRule"
 
 export default function App() {
   return (
@@ -63,6 +69,19 @@ export default function App() {
               <Route path="/teaching-journals" element={<TeachingJournal />} />
 
               <Route path="/school-locations" element={<SchoolLocation />} />
+
+              {/* Penilaoian */}
+              <Route path="/assessment-categories" element={<AssessmentCategoryPage />} />
+              <Route path="/assessments" element={<AssessmentDashboard />} />
+
+              {/* Route untuk Halaman Rapor */}
+              <Route path="/assessments/history" element={<TeacherReportPage />} />
+              <Route path="/assessments/history/:teacherId" element={<TeacherReportPage />} />
+
+              {/* Route untuk Dompet Integritas & Gamifikasi */}
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/rule_point" element={<PointRule />} />
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />
