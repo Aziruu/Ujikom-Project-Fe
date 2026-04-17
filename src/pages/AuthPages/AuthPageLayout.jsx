@@ -17,7 +17,7 @@ export default function AuthLayout({ children }) {
                 <img
                   width={231}
                   height={48}
-                  src="/images/logo/auth-logo.svg"
+                  src="/images/logo/auth-kuroku.svg"
                   alt="Logo"
                 />
               </Link>
