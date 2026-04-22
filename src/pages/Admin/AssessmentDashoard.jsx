@@ -50,8 +50,8 @@ const AssessmentDashboard = () => {
                                                         key={teacher.id}
                                                         onClick={() => !teacher.is_assessed && openAssessmentModal(teacher)}
                                                         className={`relative rounded-2xl p-6 border transition-all duration-300 ${teacher.is_assessed
-                                                                        ? 'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700 opacity-60 cursor-not-allowed'
-                                                                        : 'bg-white border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 cursor-pointer dark:bg-gray-800 dark:hover:border-blue-500'
+                                                                ? 'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700 opacity-60 cursor-not-allowed'
+                                                                : 'bg-white border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 cursor-pointer dark:bg-gray-800 dark:hover:border-blue-500'
                                                                 }`}
                                                 >
                                                         {teacher.is_assessed && (
@@ -69,7 +69,8 @@ const AssessmentDashboard = () => {
 
                         {/* Modal Form Penilaian (Gamified) */}
                         {selectedTeacher && (
-                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md px-4">
+                                /* Tante ubah z-50 jadi z-[9999] di sini biar headernya ketutup sempurna */
+                                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-md px-4 py-6">
                                         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
                                                 {/* Header Modal */}
                                                 <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
@@ -86,7 +87,7 @@ const AssessmentDashboard = () => {
                                                 </div>
 
                                                 {/* Body Modal - Scrollable */}
-                                                <div className="p-6 overflow-y-auto space-y-8">
+                                                <div className="p-6 overflow-y-auto space-y-8 flex-1">
                                                         {/* Looping Indikator Bintang */}
                                                         {categories.map(cat => (
                                                                 <div key={cat.id} className="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">

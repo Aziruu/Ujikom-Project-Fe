@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; 
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon, EnvelopeIcon, LockIcon } from "../../icons"; 
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronLeftIcon, EyeCloseIcon, EyeIcon, EnvelopeIcon, LockIcon } from "../../icons";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import api from "../../api"; 
+import api from "../../api";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Mengganti 'email' jadi 'identifier' agar lebih fleksibel (bisa email/NIP)
   const [password, setPassword] = useState("");
-  const [isChecked, setIsChecked] = useState(false); 
+  const [loginType, setLoginType] = useState("admin"); // 'admin' atau 'guru'
+  const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,12 +22,24 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      // Panggil endpoint login admin kamu
-      const response = await api.post("/login/admin", { email, password });
+      let response;
 
-      // Ambil token & user dari response backend
+      // Percabangan Endpoint berdasarkan tipe user
+      if (loginType === "admin") {
+        response = await api.post("/login/admin", {
+          email: identifier,
+          password
+        });
+      } else {
+        response = await api.post("/login/guru", {
+          login: identifier, // Sesuai dengan backend kita yang meminta parameter 'login'
+          password
+        });
+      }
+
       const token = response.data.token || response.data.access_token || response.data.data?.token;
       const user = response.data.user || response.data.data?.user;
+      const role = response.data.role; // Mengambil role dari standarisasi AuthController kita
 
       if (!token) {
         throw new Error("Token tidak ditemukan dari server");
@@ -35,13 +48,18 @@ export default function SignInForm() {
       // Simpan sesi ke localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", role); // Sangat penting untuk routing!
 
-      // Arahkan ke Dashboard
-      navigate("/"); 
+      // Arahkan ke Dashboard sesuai Role
+      if (role === 'guru') {
+        navigate("/guru/dashboard");
+      } else {
+        navigate("/admin/dashboard"); // Berlaku untuk admin & operator
+      }
+
     } catch (err) {
       console.error("Login Error:", err);
-      // Tangkap pesan error dari backend Laravel jika ada, atau tampilkan pesan default
-      setError(err.response?.data?.message || "Login gagal. Coba cek lagi email atau password-nya.");
+      setError(err.response?.data?.message || "Login gagal. Coba cek lagi kredensial kamu.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +83,7 @@ export default function SignInForm() {
               Sign In
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign in!
+              Welcome back! Please select your role and sign in.
             </p>
           </div>
 
@@ -78,17 +96,42 @@ export default function SignInForm() {
 
           <form onSubmit={handleLogin}>
             <div className="space-y-6">
-              {/* Input Email */}
+
+              {/* Tipe Login Selector */}
+              <div className="flex gap-4 p-1 bg-gray-100 rounded-lg dark:bg-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setLoginType("admin")}
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "admin"
+                      ? "bg-white text-brand-500 shadow-sm dark:bg-gray-700 dark:text-brand-400"
+                      : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                    }`}
+                >
+                  Staff / Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginType("guru")}
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${loginType === "guru"
+                      ? "bg-white text-brand-500 shadow-sm dark:bg-gray-700 dark:text-brand-400"
+                      : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                    }`}
+                >
+                  Guru (Pelapor)
+                </button>
+              </div>
+
+              {/* Input Email / NIP */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Email <span className="text-error-500">*</span>
+                  {loginType === "admin" ? "Email" : "Email / NIP"} <span className="text-error-500">*</span>
                 </label>
                 <div className="relative">
                   <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="info@gmail.com"
+                    type={loginType === "admin" ? "email" : "text"}
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder={loginType === "admin" ? "admin@sekolah.com" : "Masukkan Email atau NIP"}
                     className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pl-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     required
                   />
@@ -153,17 +196,6 @@ export default function SignInForm() {
             </div>
           </form>
 
-          <div className="mt-5">
-            <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-              Don&apos;t have an account? {""}
-              <Link
-                to="/signup"
-                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-              >
-                Sign Up
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>

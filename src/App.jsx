@@ -39,6 +39,11 @@ import Marketplace from "./pages/Admin/Marketplace"
 import Leaderboard from "./pages/Admin/Leaderboard"
 import PointRule from "./pages/Admin/PointRule"
 
+import TicketList from "./pages/Admin/TicketList";
+import TicketCreate from "./pages/Admin/TicketCreate";
+import TicketDetail from "./pages/Admin/TicketDetail";
+import OperatorPerformance from "./pages/Admin/OperatorPerformance";
+
 export default function App() {
   return (
     <>
@@ -82,6 +87,25 @@ export default function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/rule_point" element={<PointRule />} />
+
+              {/* =================================================== */}
+              {/* --- ROUTE KHUSUS UJIKOM HELPDESK --- */}
+              {/* =================================================== */}
+
+              {/* 1. Bisa diakses semua role (Guru bisa lihat tiketnya, Operator kelola tiket) */}
+              <Route path="/tickets" element={<TicketList />} />
+              <Route path="/tickets/:id" element={<TicketDetail />} />
+
+              {/* 2. KHUSUS GURU (Pelapor) */}
+              <Route element={<ProtectedRoute allowedRoles={['guru']} />}>
+                <Route path="/tickets/create" element={<TicketCreate />} />
+              </Route>
+
+              {/* 3. KHUSUS ADMIN & OPERATOR */}
+              <Route element={<ProtectedRoute allowedRoles={['admin', 'operator']} />}>
+                {/* Halaman Dashboard Analitik SLA & Respon */}
+                <Route path="/operator/performance" element={<OperatorPerformance />} />
+              </Route>
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />

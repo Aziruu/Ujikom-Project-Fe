@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-import { Link, useLocation } from "react-router" // Kembali pakai react-router bawaan template
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
-// Pastikan path icons ini sesuai dengan folder kamu ya sayang
+// Pastikan path icons ini sesuai dengan folder 
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -14,76 +14,13 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon
-} from "../icons"
-import { useSidebar } from "../context/SidebarContext"
-import SidebarWidget from "./SidebarWidget"
-import { MapIcon } from "lucide-react"
-// import { icon } from "leaflet"
+} from "../icons";
+import { useSidebar } from "../context/SidebarContext";
+import SidebarWidget from "./SidebarWidget";
+import { MapIcon } from "lucide-react";
 
 // ==========================================
-// MENU UTAMA
-// ==========================================
-const navItems = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/"
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Absensi",
-    path: "/attendance"
-  },
-  {
-    name: "Log & Laporan",
-    icon: <ListIcon />,
-    subItems: [
-      { name: "Laporan Absensi", path: "/report" },
-      { name: "Pengajuan Cuti", path: "/leaves" },
-      { name: "Jurnal Mengajar", path: "/teaching-journals" }
-    ]
-  },
-  {
-    name: "Jadwal",
-    icon: <CalenderIcon />,
-    subItems: [
-      { name: "Jadwal Bekerja", path: "/work-schedules" },
-      { name: "Jadwal Mengajar", path: "/teaching-schedules" }
-    ]
-  },
-  {
-    name: "Data Master",
-    icon: <TableIcon />,
-    subItems: [
-      { name: "Data Guru", path: "/teachers" },
-      { name: "Data Kelas", path: "/classrooms" },
-      { name: "Data Jurusan", path: "/majors" },
-      { name: "Mata Pelajaran", path: "/subjects" },
-      { name: "Tahun Ajar", path: "/academic-years" }
-    ]
-  },
-  {
-    name: "Penilaian Guru",
-    icon: <FileIcon />,
-    subItems: [
-      { name: "Assessment Category", path: "/assessment-categories" },
-      { name: "Assessment", path: "/assessments" },
-      { name: "Assessment History", path: "/assessments/history" },
-    ]
-  },
-  {
-    name: "Dompet Integritas", 
-    icon: <FolderIcon />,
-    subItems: [
-      { name: "Leaderboard", path: "/leaderboard" },
-      { name: "Katalog Reward", path: "/marketplace" },
-      { name: "Rule Point", path: "/rule_point" },
-    ]
-  }
-]
-
-// ==========================================
-// MENU PENGATURAN LAINNYA
+// MENU PENGATURAN LAINNYA (Tetap statis di luar)
 // ==========================================
 const othersItems = [
   {
@@ -96,59 +33,134 @@ const othersItems = [
     name: "Profil Admin",
     path: "/profile"
   }
-]
+];
 
 const AppSidebar = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar()
-  const location = useLocation()
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const location = useLocation();
 
-  const [openSubmenu, setOpenSubmenu] = useState(null)
-  const [subMenuHeight, setSubMenuHeight] = useState({})
-  const subMenuRefs = useRef({})
+  // 1. AMBIL ROLE DI SINI (Di dalam fungsi komponen)
+  const role = localStorage.getItem("role");
+
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const [subMenuHeight, setSubMenuHeight] = useState({});
+  const subMenuRefs = useRef({});
+
+  // ==========================================
+  // MENU UTAMA (Wajib di dalam fungsi agar bisa membaca variabel 'role')
+  // ==========================================
+  const navItems = [
+    {
+      icon: <GridIcon />,
+      name: "Dashboard",
+      path: "/"
+    },
+    {
+      name: "Helpdesk (Ujikom) 🚀",
+      icon: <PlugInIcon />,
+      subItems: [
+        { name: "Quest Board", path: "/tickets" },
+        // Logika Pintar: Menu ini hanya muncul jika role BUKAN guru
+        ...(role !== 'guru' ? [{ name: "Performa Operator", path: "/operator/performance" }] : [])
+      ]
+    },
+    {
+      icon: <BoxCubeIcon />,
+      name: "Absensi",
+      path: "/attendance"
+    },
+    {
+      name: "Log & Laporan",
+      icon: <ListIcon />,
+      subItems: [
+        { name: "Laporan Absensi", path: "/report" },
+        { name: "Pengajuan Cuti", path: "/leaves" },
+        { name: "Jurnal Mengajar", path: "/teaching-journals" }
+      ]
+    },
+    {
+      name: "Jadwal",
+      icon: <CalenderIcon />,
+      subItems: [
+        { name: "Jadwal Bekerja", path: "/work-schedules" },
+        { name: "Jadwal Mengajar", path: "/teaching-schedules" }
+      ]
+    },
+    {
+      name: "Data Master",
+      icon: <TableIcon />,
+      subItems: [
+        { name: "Data Guru", path: "/teachers" },
+        { name: "Data Kelas", path: "/classrooms" },
+        { name: "Data Jurusan", path: "/majors" },
+        { name: "Mata Pelajaran", path: "/subjects" },
+        { name: "Tahun Ajar", path: "/academic-years" }
+      ]
+    },
+    {
+      name: "Penilaian Guru",
+      icon: <FileIcon />,
+      subItems: [
+        { name: "Assessment Category", path: "/assessment-categories" },
+        { name: "Assessment", path: "/assessments" },
+        { name: "Assessment History", path: "/assessments/history" },
+      ]
+    },
+    {
+      name: "Dompet Integritas",
+      icon: <FolderIcon />,
+      subItems: [
+        { name: "Leaderboard", path: "/leaderboard" },
+        { name: "Katalog Reward", path: "/marketplace" },
+        { name: "Rule Point", path: "/rule_point" },
+      ]
+    }
+  ];
 
   const isActive = useCallback(path => location.pathname === path, [
     location.pathname
-  ])
+  ]);
 
   useEffect(() => {
-    let submenuMatched = false
-      ;["main", "others"].forEach(menuType => {
-        const items = menuType === "main" ? navItems : othersItems
-        items.forEach((nav, index) => {
-          if (nav.subItems) {
-            nav.subItems.forEach(subItem => {
-              if (isActive(subItem.path)) {
-                setTimeout(() => {
-                  setOpenSubmenu({
-                    type: menuType,
-                    index
-                  })
-                }, 0)
-                submenuMatched = true
-              }
-            })
-          }
-        })
-      })
+    let submenuMatched = false;
+    ["main", "others"].forEach(menuType => {
+      const items = menuType === "main" ? navItems : othersItems;
+      items.forEach((nav, index) => {
+        if (nav.subItems) {
+          nav.subItems.forEach(subItem => {
+            if (isActive(subItem.path)) {
+              setTimeout(() => {
+                setOpenSubmenu({
+                  type: menuType,
+                  index
+                });
+              }, 0);
+              submenuMatched = true;
+            }
+          });
+        }
+      });
+    });
 
     if (!submenuMatched) {
       setTimeout(() => {
-        setOpenSubmenu(null)
-      }, 0)
+        setOpenSubmenu(null);
+      }, 0);
     }
-  }, [location, isActive])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location, isActive]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
-      const key = `${openSubmenu.type}-${openSubmenu.index}`
+      const key = `${openSubmenu.type}-${openSubmenu.index}`;
       if (subMenuRefs.current[key]) {
         setSubMenuHeight(prevHeights => ({
           ...prevHeights,
           [key]: subMenuRefs.current[key]?.scrollHeight || 0
-        }))
+        }));
       }
     }
-  }, [openSubmenu])
+  }, [openSubmenu]);
 
   const handleSubmenuToggle = (index, menuType) => {
     setOpenSubmenu(prevOpenSubmenu => {
@@ -157,11 +169,11 @@ const AppSidebar = () => {
         prevOpenSubmenu.type === menuType &&
         prevOpenSubmenu.index === index
       ) {
-        return null
+        return null;
       }
-      return { type: menuType, index }
-    })
-  }
+      return { type: menuType, index };
+    });
+  };
 
   const renderMenuItems = (items, menuType) => (
     <ul className="flex flex-col gap-4">
@@ -223,7 +235,7 @@ const AppSidebar = () => {
           {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
             <div
               ref={el => {
-                subMenuRefs.current[`${menuType}-${index}`] = el
+                subMenuRefs.current[`${menuType}-${index}`] = el;
               }}
               className="overflow-hidden transition-all duration-300"
               style={{
@@ -253,7 +265,7 @@ const AppSidebar = () => {
         </li>
       ))}
     </ul>
-  )
+  );
 
   return (
     <aside
@@ -336,11 +348,10 @@ const AppSidebar = () => {
             </div>
           </div>
         </nav>
-        {/* Iklan bawaan template dipanggil di sini, tapi tenang udah kita basmi di bawah! */}
         {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
-  )
-}
+  );
+};
 
-export default AppSidebar
+export default AppSidebar;
